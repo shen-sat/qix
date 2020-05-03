@@ -22,14 +22,20 @@ function run_level()
     width = 8,
     height = 8,
     destination = {
-      x = flr(rnd(108) + 10),
-      y = flr(rnd(108) + 10)
+      x = flr(rnd(118)),
+      y = flr(rnd(98)),
+      width = 10,
+      height = 10
     },
     update = function(self)
       self:move()
     end,
     destination_reached = function(self)
-      return (self.x == self.destination.x and self.y == self.destination.y)
+      local left = self.destination.x
+      local top = self.destination.y
+      local width = self.destination.width
+      local height = self.destination.height
+      return point_in_rect(self.x,self.y,left,top,width,height)
     end,
     generate_destination = function(self)
       self.destination.x = flr(rnd(108) + 10)
@@ -39,10 +45,10 @@ function run_level()
       if self:destination_reached() then
         self:generate_destination()
       else
-        if self.x > self.destination.x then self.x -= 1 end
-        if self.x < self.destination.x then self.x += 1 end
-        if self.y > self.destination.y then self.y -= 1 end
-        if self.y < self.destination.y then self.y += 1 end
+        if self.x >= (self.destination.x + self.destination.width) then self.x -= 1 end
+        if self.x <= self.destination.x then self.x += 1 end
+        if self.y >= (self.destination.y + self.destination.height) then self.y -= 1 end
+        if self.y <= self.destination.y then self.y += 1 end
       end
     end
   } 
@@ -59,7 +65,12 @@ function level_draw()
   cls()
   rect(0,0,127,127,7) --border
   spr(qix.sprite, qix.x - qix.width/2, qix.y - qix.height/2)
-  print(qix:destination_reached())
+  -- destination hitbox
+  rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width,qix.destination.y + qix.destination.height,7)
+end
+
+function point_in_rect(x,y,left,top,width,height)
+  return x > left and x < (left + width) and y > top and y < (top + height)
 end
 
 __gfx__
