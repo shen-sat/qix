@@ -21,6 +21,7 @@ function run_level()
     y = 64,
     width = 8,
     height = 8,
+    speed = 0.5,
     destination = {
       x = flr(rnd(118)),
       y = flr(rnd(98)),
@@ -45,13 +46,15 @@ function run_level()
       if self:destination_reached() then
         self:generate_destination()
       else
-        if self.x >= (self.destination.x + self.destination.width) then self.x -= 1 end
-        if self.x <= self.destination.x then self.x += 1 end
-        if self.y >= (self.destination.y + self.destination.height) then self.y -= 1 end
-        if self.y <= self.destination.y then self.y += 1 end
+        if self.x >= (self.destination.x + self.destination.width) then self.x -= self.speed end
+        if self.x <= self.destination.x then self.x += self.speed end
+        if self.y >= (self.destination.y + self.destination.height) then self.y -= self.speed end
+        if self.y <= self.destination.y then self.y += self.speed end
       end
     end
-  } 
+  }
+  counter = 0
+  move_history = {}
 
   game.update = level_update
   game.draw = level_draw
@@ -59,14 +62,30 @@ end
 
 function level_update()
   qix:update()
+
+  counter += 1
+  
+  if counter % 10 == 0 then 
+    step = {qix.x, qix.y}
+    add(move_history, step)
+  end
+
+  if #move_history > 5 then del(move_history, move_history[1]) end
+
 end
 
 function level_draw()
   cls()
   rect(0,0,127,127,7) --border
-  spr(qix.sprite, qix.x - qix.width/2, qix.y - qix.height/2)
+
+  foreach(move_history,draw_block) 
+
   -- destination hitbox
   rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width,qix.destination.y + qix.destination.height,7)
+end
+
+function draw_block(step)
+ spr(qix.sprite, step[1] - qix.width/2, step[2] - qix.height/2)
 end
 
 function point_in_rect(x,y,left,top,width,height)
