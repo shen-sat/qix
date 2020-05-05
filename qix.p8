@@ -33,6 +33,12 @@ function run_level()
       self:move()
       self:manage_move_history()
     end,
+    draw = function(self)
+     foreach(self.move_history,self.draw_step)
+    end,
+    draw_step = function(step)
+     spr(step.sprite, step.x - step.width/2, step.y - step.height/2)
+    end,
     destination_reached = function(self)
       local left = self.destination.x
       local top = self.destination.y
@@ -56,12 +62,13 @@ function run_level()
     end,
     manage_move_history = function(self)
      if frame_counter % 10 == 0 then 
-       local step = { self.x, self.y }
+       local step = { x=self.x, y=self.y, width=self.width, height=self.height, sprite=self.sprite }
        add(self.move_history, step)
      end
      if #self.move_history > 5 then del(self.move_history, self.move_history[1]) end
     end
   }
+
   frame_counter = 0
 
   game.update = level_update
@@ -76,14 +83,9 @@ end
 function level_draw()
   cls()
   rect(0,0,127,127,7) --border
-  foreach(qix.move_history,draw_block) 
-
+  qix:draw()
   -- destination hitbox
   rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width,qix.destination.y + qix.destination.height,7)
-end
-
-function draw_block(step)
- spr(qix.sprite, step[1] - qix.width/2, step[2] - qix.height/2)
 end
 
 function point_in_rect(x,y,left,top,width,height)
