@@ -28,8 +28,10 @@ function run_level()
       width = 10,
       height = 10
     },
+    move_history = {},
     update = function(self)
       self:move()
+      self:manage_move_history()
     end,
     destination_reached = function(self)
       local left = self.destination.x
@@ -51,34 +53,30 @@ function run_level()
         if self.y >= (self.destination.y + self.destination.height) then self.y -= self.speed end
         if self.y <= self.destination.y then self.y += self.speed end
       end
+    end,
+    manage_move_history = function(self)
+     if frame_counter % 10 == 0 then 
+       local step = { self.x, self.y }
+       add(self.move_history, step)
+     end
+     if #self.move_history > 5 then del(self.move_history, self.move_history[1]) end
     end
   }
-  counter = 0
-  move_history = {}
+  frame_counter = 0
 
   game.update = level_update
   game.draw = level_draw
 end
 
 function level_update()
+  frame_counter += 1
   qix:update()
-
-  counter += 1
-  
-  if counter % 10 == 0 then 
-    step = {qix.x, qix.y}
-    add(move_history, step)
-  end
-
-  if #move_history > 5 then del(move_history, move_history[1]) end
-
 end
 
 function level_draw()
   cls()
   rect(0,0,127,127,7) --border
-
-  foreach(move_history,draw_block) 
+  foreach(qix.move_history,draw_block) 
 
   -- destination hitbox
   rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width,qix.destination.y + qix.destination.height,7)
