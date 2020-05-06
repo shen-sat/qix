@@ -41,17 +41,13 @@ function run_level()
      spr(step.sprite, step.x, step.y)
     end,
     destination_reached = function(self)
-      -- local left = self.destination.x
-      -- local top = self.destination.y
-      -- local width = self.destination.width
-      -- local height = self.destination.height
       return point_in_rect(self,self.destination)
     end,
     generate_destination = function(self)
       self.destination.x = flr(rnd(108) + 10)
       self.destination.y = flr(rnd(108) + 10)
-      local x_distance = self.x - self.destination.x
-      local y_distance = self.y - self.destination.y
+      local x_distance = center_of(self).x - center_of(self.destination).x
+      local y_distance = center_of(self).y - center_of(self.destination).y
 
       if x_distance < 1 then x_distance = x_distance * -1 end
       if y_distance < 1 then y_distance = y_distance * -1 end
@@ -63,15 +59,15 @@ function run_level()
       if self:destination_reached() then
         self:generate_destination()
       else
-        if (self.x + self.width/2) >= (self.destination.x + self.destination.width) then self.x -= self.x_speed end
-        if (self.x + self.width/2) <= self.destination.x then self.x += self.x_speed end
-        if (self.y + self.height/2) >= (self.destination.y + self.destination.height) then self.y -= self.y_speed end
-        if (self.y + self.height/2) <= self.destination.y then self.y += self.y_speed end
+        if center_of(self).x >= center_of(self.destination).x then self.x -= self.x_speed end
+        if center_of(self).x <= center_of(self.destination).x then self.x += self.x_speed end
+        if center_of(self).y >= center_of(self.destination).y then self.y -= self.y_speed end
+        if center_of(self).y <= center_of(self.destination).y then self.y += self.y_speed end
       end
     end,
     manage_move_history = function(self)
      if frame_counter % 10 == 0 then 
-       local step = { x=self.x, y=self.y, width=self.width, height=self.height, sprite=self.sprite }
+       local step = self
        add(self.move_history, step)
      end
      if #self.move_history > 5 then del(self.move_history, self.move_history[1]) end
@@ -97,6 +93,10 @@ function level_draw()
   -- destination hitbox
   rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
   
+end
+
+function center_of(obj)
+ return { x = obj.x + (obj.width/2), y = obj.y + (obj.height/2) }
 end
 
 function point_in_rect(point_obj, rect_obj)
