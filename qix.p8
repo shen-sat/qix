@@ -90,11 +90,13 @@ function level_update()
 end
 
 function level_draw()
+  -- higher something is here, the further in the background it is
   cls()
   rect(0,0,127,127,7) --border
   qix:draw()
   -- destination hitbox
-  rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width,qix.destination.y + qix.destination.height,7)
+  rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
+  
 end
 
 function point_in_rect(x,y,left,top,width,height)
