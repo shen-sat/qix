@@ -38,14 +38,14 @@ function run_level()
      foreach(self.move_history,self.draw_step)
     end,
     draw_step = function(step)
-     spr(step.sprite, step.x - step.width/2, step.y - step.height/2)
+     spr(step.sprite, step.x, step.y)
     end,
     destination_reached = function(self)
-      local left = self.destination.x
-      local top = self.destination.y
-      local width = self.destination.width
-      local height = self.destination.height
-      return point_in_rect(self.x,self.y,left,top,width,height)
+      -- local left = self.destination.x
+      -- local top = self.destination.y
+      -- local width = self.destination.width
+      -- local height = self.destination.height
+      return point_in_rect(self,self.destination)
     end,
     generate_destination = function(self)
       self.destination.x = flr(rnd(108) + 10)
@@ -63,10 +63,10 @@ function run_level()
       if self:destination_reached() then
         self:generate_destination()
       else
-        if self.x >= (self.destination.x + self.destination.width) then self.x -= self.x_speed end
-        if self.x <= self.destination.x then self.x += self.x_speed end
-        if self.y >= (self.destination.y + self.destination.height) then self.y -= self.y_speed end
-        if self.y <= self.destination.y then self.y += self.y_speed end
+        if (self.x + self.width/2) >= (self.destination.x + self.destination.width) then self.x -= self.x_speed end
+        if (self.x + self.width/2) <= self.destination.x then self.x += self.x_speed end
+        if (self.y + self.height/2) >= (self.destination.y + self.destination.height) then self.y -= self.y_speed end
+        if (self.y + self.height/2) <= self.destination.y then self.y += self.y_speed end
       end
     end,
     manage_move_history = function(self)
@@ -99,7 +99,14 @@ function level_draw()
   
 end
 
-function point_in_rect(x,y,left,top,width,height)
+function point_in_rect(point_obj, rect_obj)
+  -- x,y,left,top,width,height
+  local x = point_obj.x + (point_obj.width/2)
+  local y = point_obj.y + (point_obj.height/2)
+  local left = rect_obj.x
+  local top = rect_obj.y
+  local width = rect_obj.width
+  local height = rect_obj.height
   return x > left and x < (left + width) and y > top and y < (top + height)
 end
 
