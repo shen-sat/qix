@@ -21,7 +21,8 @@ function run_level()
     y = 64,
     width = 8,
     height = 8,
-    speed = 0.5,
+    x_speed = 0.5,
+    y_speed = 0.5,
     destination = {
       x = flr(rnd(118)),
       y = flr(rnd(98)),
@@ -49,15 +50,23 @@ function run_level()
     generate_destination = function(self)
       self.destination.x = flr(rnd(108) + 10)
       self.destination.y = flr(rnd(108) + 10)
+      local x_distance = self.x - self.destination.x
+      local y_distance = self.y - self.destination.y
+
+      if x_distance < 1 then x_distance = x_distance * -1 end
+      if y_distance < 1 then y_distance = y_distance * -1 end
+
+      self.x_speed = x_distance/60
+      self.y_speed = y_distance/60
     end,
     move = function(self)
       if self:destination_reached() then
         self:generate_destination()
       else
-        if self.x >= (self.destination.x + self.destination.width) then self.x -= self.speed end
-        if self.x <= self.destination.x then self.x += self.speed end
-        if self.y >= (self.destination.y + self.destination.height) then self.y -= self.speed end
-        if self.y <= self.destination.y then self.y += self.speed end
+        if self.x >= (self.destination.x + self.destination.width) then self.x -= self.x_speed end
+        if self.x <= self.destination.x then self.x += self.x_speed end
+        if self.y >= (self.destination.y + self.destination.height) then self.y -= self.y_speed end
+        if self.y <= self.destination.y then self.y += self.y_speed end
       end
     end,
     manage_move_history = function(self)
