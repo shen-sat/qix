@@ -67,7 +67,7 @@ function run_level()
     end,
     manage_move_history = function(self)
      if frame_counter % 10 == 0 then 
-       local step = self
+       local step = { sprite = self.sprite, x = self.x, y = self.y }
        add(self.move_history, step)
      end
      if #self.move_history > 5 then del(self.move_history, self.move_history[1]) end
