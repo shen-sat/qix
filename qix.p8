@@ -83,6 +83,12 @@ end
 function level_update()
   frame_counter += 1
   qix:update()
+
+  -- control qix manually
+  -- if btn(0) then qix.x -= 1 end
+  -- if btn(1) then qix.x += 1 end
+  -- if btn(2) then qix.y -= 1 end
+  -- if btn(3) then qix.y += 1 end
 end
 
 function level_draw()
@@ -92,7 +98,20 @@ function level_draw()
   qix:draw()
   -- destination hitbox
   rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
-  
+end
+
+function check_overlap(rect_a, rect_b)
+ local rect_a_right = rect_a.x + rect_a.width
+ local rect_a_left = rect_a.x
+ local rect_b_right = rect_b.x + rect_b.width
+ local rect_b_left = rect_b.x
+
+ local rect_a_top = rect_a.y
+ local rect_a_bottom = rect_a.y + rect_a.height
+ local rect_b_top = rect_b.y
+ local rect_b_bottom = rect_b.y + rect_b.height
+ 
+ return (rect_a_right > rect_b_left and rect_b_right > rect_a_left) and (rect_a_bottom > rect_b_top and rect_b_bottom > rect_a_top)
 end
 
 function center_of(obj)
@@ -100,7 +119,6 @@ function center_of(obj)
 end
 
 function point_in_rect(point_obj, rect_obj)
-  -- x,y,left,top,width,height
   local x = point_obj.x + (point_obj.width/2)
   local y = point_obj.y + (point_obj.height/2)
   local left = rect_obj.x
