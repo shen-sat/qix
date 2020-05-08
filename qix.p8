@@ -37,6 +37,44 @@ function run_level()
     draw = function(self)
      foreach(self.move_history,self.draw_step)
     end,
+    check_block_collision = function(self)
+     local gap = 3
+     local top_hitbox = {
+      x = self.x + gap,
+      y = self.y,
+      width = self.width - (2*gap),
+      height = self.height/2
+     }
+     local bottom_hitbox = {
+      x = self.x + gap,
+      y = self.y + self.height/2,
+      width = self.width - (2*gap),
+      height = self.height/2
+     }
+     local right_hitbox = {
+      x = self.x + self.width/2,
+      y = self.y + gap,
+      width = self.width/2,
+      height = self.height - (2*gap)
+     }
+     local left_hitbox = {
+      x = self.x,
+      y = self.y + gap,
+      width = self.width/2,
+      height = self.height - (2*gap)
+     }
+     if check_overlap(top_hitbox, block) then
+      collided = 'top'
+     elseif check_overlap(bottom_hitbox, block) then
+      collided = 'bottom'
+     elseif check_overlap(right_hitbox, block) then
+      collided = 'right'
+     elseif check_overlap(left_hitbox, block) then
+      collided = 'left'
+     else
+      collided = 'no collision'
+     end
+    end,
     draw_step = function(step)
      spr(step.sprite, step.x, step.y)
     end,
@@ -64,6 +102,7 @@ function run_level()
       --   if center_of(self).y >= center_of(self.destination).y then self.y -= self.y_speed end
       --   if center_of(self).y <= center_of(self.destination).y then self.y += self.y_speed end
       -- end
+      self:check_block_collision()
     end,
     manage_move_history = function(self)
      if frame_counter % 10 == 0 then 
@@ -75,6 +114,8 @@ function run_level()
   }
 
   frame_counter = 0
+
+  collided = 'hello'
 
   block = {
    x = 50,
@@ -97,45 +138,6 @@ function level_update()
   if btn(2) then qix.y -= 1 end
   if btn(3) then qix.y += 1 end
 
-  --collision
-  local top_hitbox = {
-   x = qix.x + 2,
-   y = qix.y,
-   width = 4,
-   height = qix.height/2
-  }
-  local bottom_hitbox = {
-   x = qix.x + 2,
-   y = qix.y + qix.height/2,
-   width = 4,
-   height = qix.height/2
-  }
-  local right_hitbox = {
-   x = qix.x + qix.width/2,
-   y = qix.y + 2,
-   width = qix.width/2,
-   height = 4
-  }
-  local left_hitbox = {
-   x = qix.x,
-   y = qix.y + 2,
-   width = qix.width/2,
-   height = 4
-  }
-
-  if check_overlap(top_hitbox, block) then
-   collided = 'top'
-  elseif check_overlap(bottom_hitbox, block) then
-   collided = 'bottom'
-  elseif check_overlap(right_hitbox, block) then
-   collided = 'right'
-  elseif check_overlap(left_hitbox, block) then
-   collided = 'left'
-  else
-   collided = 'no collision'
-  end
-
-  -- collided = check_overlap(top_hitbox, block)
 end
 
 function level_draw()
@@ -145,9 +147,6 @@ function level_draw()
   qix:draw()
   -- destination hitbox
   rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
-
-  --top hitbox
-  rect(qix.x + 2,qix.y,qix.x + 2 + 2 + 2 -1,(qix.y + qix.height/2) - 1,8)
   --block
   rect(block.x,block.y,block.x + block.width - 1,block.y + block.height - 1,11)
   --print collision
