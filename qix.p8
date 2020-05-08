@@ -102,10 +102,40 @@ function level_update()
    x = qix.x + 2,
    y = qix.y,
    width = 4,
+   height = qix.height/2
+  }
+  local bottom_hitbox = {
+   x = qix.x + 2,
+   y = qix.y + qix.height/2,
+   width = 4,
+   height = qix.height/2
+  }
+  local right_hitbox = {
+   x = qix.x + qix.width/2,
+   y = qix.y + 2,
+   width = qix.width/2,
+   height = 4
+  }
+  local left_hitbox = {
+   x = qix.x,
+   y = qix.y + 2,
+   width = qix.width/2,
    height = 4
   }
 
-  collided = check_overlap(top_hitbox, block)
+  if check_overlap(top_hitbox, block) then
+   collided = 'top'
+  elseif check_overlap(bottom_hitbox, block) then
+   collided = 'bottom'
+  elseif check_overlap(right_hitbox, block) then
+   collided = 'right'
+  elseif check_overlap(left_hitbox, block) then
+   collided = 'left'
+  else
+   collided = 'no collision'
+  end
+
+  -- collided = check_overlap(top_hitbox, block)
 end
 
 function level_draw()
