@@ -56,14 +56,14 @@ function run_level()
       self.y_speed = y_distance/60
     end,
     move = function(self)
-      if self:destination_reached() then
-        self:generate_destination()
-      else
-        if center_of(self).x >= center_of(self.destination).x then self.x -= self.x_speed end
-        if center_of(self).x <= center_of(self.destination).x then self.x += self.x_speed end
-        if center_of(self).y >= center_of(self.destination).y then self.y -= self.y_speed end
-        if center_of(self).y <= center_of(self.destination).y then self.y += self.y_speed end
-      end
+      -- if self:destination_reached() then
+      --   self:generate_destination()
+      -- else
+      --   if center_of(self).x >= center_of(self.destination).x then self.x -= self.x_speed end
+      --   if center_of(self).x <= center_of(self.destination).x then self.x += self.x_speed end
+      --   if center_of(self).y >= center_of(self.destination).y then self.y -= self.y_speed end
+      --   if center_of(self).y <= center_of(self.destination).y then self.y += self.y_speed end
+      -- end
     end,
     manage_move_history = function(self)
      if frame_counter % 10 == 0 then 
@@ -76,6 +76,13 @@ function run_level()
 
   frame_counter = 0
 
+  block = {
+   x = 50,
+   y = 50,
+   width = 10,
+   height = 10
+  }
+
   game.update = level_update
   game.draw = level_draw
 end
@@ -85,10 +92,20 @@ function level_update()
   qix:update()
 
   -- control qix manually
-  -- if btn(0) then qix.x -= 1 end
-  -- if btn(1) then qix.x += 1 end
-  -- if btn(2) then qix.y -= 1 end
-  -- if btn(3) then qix.y += 1 end
+  if btn(0) then qix.x -= 1 end
+  if btn(1) then qix.x += 1 end
+  if btn(2) then qix.y -= 1 end
+  if btn(3) then qix.y += 1 end
+
+  --collision
+  local top_hitbox = {
+   x = qix.x + 2,
+   y = qix.y,
+   width = 4,
+   height = 4
+  }
+
+  collided = check_overlap(top_hitbox, block)
 end
 
 function level_draw()
@@ -98,6 +115,13 @@ function level_draw()
   qix:draw()
   -- destination hitbox
   rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
+
+  --top hitbox
+  rect(qix.x + 2,qix.y,qix.x + 2 + 2 + 2 -1,(qix.y + qix.height/2) - 1,8)
+  --block
+  rect(block.x,block.y,block.x + block.width - 1,block.y + block.height - 1,11)
+  --print collision
+  print(collided,1,1,7)
 end
 
 function check_overlap(rect_a, rect_b)
