@@ -1,4 +1,4 @@
-pico-8 cartridge // http://www.pico-8.com
+ pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
 function _init()
@@ -63,17 +63,19 @@ function run_level()
       width = self.width/2,
       height = self.height - (2*gap)
      }
-     if check_overlap(top_hitbox, block) then
-      collided = 'top'
-     elseif check_overlap(bottom_hitbox, block) then
-      collided = 'bottom'
-     elseif check_overlap(right_hitbox, block) then
-      collided = 'right'
-     elseif check_overlap(left_hitbox, block) then
-      collided = 'left'
-     else
-      collided = 'no collision'
+     local collision
+     for block in all(blocks) do
+      if check_overlap(top_hitbox, block) then
+       collision = 'top'
+      elseif check_overlap(bottom_hitbox, block) then
+       collision = 'bottom'
+      elseif check_overlap(right_hitbox, block) then
+       collision = 'right'
+      elseif check_overlap(left_hitbox, block) then
+       collision = 'left'
+      end
      end
+     return collision
     end,
     draw_step = function(step)
      spr(step.sprite, step.x, step.y)
@@ -94,6 +96,30 @@ function run_level()
       self.y_speed = y_distance/60
     end,
     move = function(self)
+     if center_of(self).x >= center_of(self.destination).x then self.x -= self.x_speed end
+     if center_of(self).x <= center_of(self.destination).x then self.x += self.x_speed end
+     if center_of(self).y >= center_of(self.destination).y then self.y -= self.y_speed end
+     if center_of(self).y <= center_of(self.destination).y then self.y += self.y_speed end
+
+     -- refactor to use case
+     if self:check_block_collision() == 'top' then 
+      self:generate_destination()
+      self.y += self.y_speed
+     elseif self:check_block_collision() == 'bottom' then
+      self:generate_destination()
+      self.y -= self.y_speed
+     elseif self:check_block_collision() == 'left' then
+      self:generate_destination()
+      self.x += self.x_speed
+     elseif self:check_block_collision() == 'right' then
+      self:generate_destination()
+      self.x -= self.x_speed
+     end
+
+     if self:destination_reached() then self:generate_destination() end
+
+
+
       -- if self:destination_reached() then
       --   self:generate_destination()
       -- else
@@ -102,7 +128,7 @@ function run_level()
       --   if center_of(self).y >= center_of(self.destination).y then self.y -= self.y_speed end
       --   if center_of(self).y <= center_of(self.destination).y then self.y += self.y_speed end
       -- end
-      self:check_block_collision()
+      -- self:check_block_collision()
     end,
     manage_move_history = function(self)
      if frame_counter % 10 == 0 then 
@@ -115,14 +141,36 @@ function run_level()
 
   frame_counter = 0
 
-  collided = 'hello'
-
-  block = {
-   x = 50,
-   y = 50,
-   width = 10,
-   height = 10
+  blocks = {}
+  top_block = {
+   x = 0,
+   y = 0,
+   width = 128,
+   height = 128/4
   }
+  bottom_block = {
+   x = 0,
+   y = 96,
+   width = 128,
+   height = 128/4
+  }
+  left_block = {
+   x = 0,
+   y = 0,
+   width = 128/4,
+   height = 128
+  }
+  right_block = {
+   x = 96,
+   y = 0,
+   width = 128/4,
+   height = 128
+  }
+  add(blocks, top_block)
+  add(blocks, bottom_block)
+  add(blocks, left_block)
+  add(blocks, right_block)
+
 
   game.update = level_update
   game.draw = level_draw
@@ -144,13 +192,13 @@ function level_draw()
   -- higher something is here, the further in the background it is
   cls()
   rect(0,0,127,127,7) --border
+  --block
+  for block in all(blocks) do
+   rectfill(block.x,block.y,block.x + block.width - 1,block.y + block.height - 1,3)
+  end
   qix:draw()
   -- destination hitbox
   rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
-  --block
-  rect(block.x,block.y,block.x + block.width - 1,block.y + block.height - 1,11)
-  --print collision
-  print(collided,1,1,7)
 end
 
 function check_overlap(rect_a, rect_b)
