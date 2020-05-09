@@ -113,35 +113,6 @@ function run_level()
   frame_counter = 0
 
   blocks = {}
-  top_block = {
-   x = 0,
-   y = 0,
-   width = 128,
-   height = 128/4
-  }
-  bottom_block = {
-   x = 0,
-   y = 96,
-   width = 128,
-   height = 128/4
-  }
-  left_block = {
-   x = 0,
-   y = 0,
-   width = 128/4,
-   height = 128
-  }
-  right_block = {
-   x = 96,
-   y = 0,
-   width = 128/4,
-   height = 128
-  }
-  add(blocks, top_block)
-  add(blocks, bottom_block)
-  add(blocks, left_block)
-  add(blocks, right_block)
-
 
   game.update = level_update
   game.draw = level_draw
@@ -150,23 +121,12 @@ end
 function level_update()
   frame_counter += 1
   qix:update()
-
-  -- control qix manually
-  if btn(0) then qix.x -= 1 end
-  if btn(1) then qix.x += 1 end
-  if btn(2) then qix.y -= 1 end
-  if btn(3) then qix.y += 1 end
-
 end
 
 function level_draw()
   -- higher something is here, the further in the background it is
   cls()
   rect(0,0,127,127,7) --border
-  --block
-  for block in all(blocks) do
-   rectfill(block.x,block.y,block.x + block.width - 1,block.y + block.height - 1,3)
-  end
   qix:draw()
   -- destination hitbox
   rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
@@ -199,6 +159,49 @@ function point_in_rect(point_obj, rect_obj)
   local height = rect_obj.height
   return x > left and x < (left + width) and y > top and y < (top + height)
 end
+
+--------------------------------------------------------------------------------
+
+-- draw block
+ -- for block in all(blocks) do
+ --  rectfill(block.x,block.y,block.x + block.width - 1,block.y + block.height - 1,3)
+ -- end
+
+-- control qix manually
+ -- if btn(0) then qix.x -= 1 end
+ -- if btn(1) then qix.x += 1 end
+ -- if btn(2) then qix.y -= 1 end
+ -- if btn(3) then qix.y += 1 end
+
+-- blocks, if you need em
+ -- top_block = {
+ --  x = 0,
+ --  y = 0,
+ --  width = 128,
+ --  height = 128/4
+ -- }
+ -- bottom_block = {
+ --  x = 0,
+ --  y = 96,
+ --  width = 128,
+ --  height = 128/4
+ -- }
+ -- left_block = {
+ --  x = 0,
+ --  y = 0,
+ --  width = 128/4,
+ --  height = 128
+ -- }
+ -- right_block = {
+ --  x = 96,
+ --  y = 0,
+ --  width = 128/4,
+ --  height = 128
+ -- }
+ -- add(blocks, top_block)
+ -- add(blocks, bottom_block)
+ -- add(blocks, left_block)
+ -- add(blocks, right_block)
 
 __gfx__
 aaaaaaaa000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
