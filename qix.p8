@@ -30,6 +30,15 @@ function run_level()
       height = 10
     },
     move_history = {},
+    hitboxes = function(self)
+     local gap = 3
+     return {
+       top_hitbox = { x = self.x + gap, y = self.y, width = self.width - (2*gap), height = self.height/2 },
+       bottom_hitbox = { x = self.x + gap, y = self.y + self.height/2, width = self.width - (2*gap), height = self.height/2 },
+       right_hitbox = { x = self.x + self.width/2, y = self.y + gap, width = self.width/2, height = self.height - (2*gap) },
+       left_hitbox = { x = self.x, y = self.y + gap, width = self.width/2, height = self.height - (2*gap) }
+      }
+    end,
     update = function(self)
       self:move()
       self:manage_move_history()
@@ -38,44 +47,19 @@ function run_level()
      foreach(self.move_history,self.draw_step)
     end,
     check_block_collision = function(self)
-     local gap = 3
-     local top_hitbox = {
-      x = self.x + gap,
-      y = self.y,
-      width = self.width - (2*gap),
-      height = self.height/2
-     }
-     local bottom_hitbox = {
-      x = self.x + gap,
-      y = self.y + self.height/2,
-      width = self.width - (2*gap),
-      height = self.height/2
-     }
-     local right_hitbox = {
-      x = self.x + self.width/2,
-      y = self.y + gap,
-      width = self.width/2,
-      height = self.height - (2*gap)
-     }
-     local left_hitbox = {
-      x = self.x,
-      y = self.y + gap,
-      width = self.width/2,
-      height = self.height - (2*gap)
-     }
-     local collision
+     local collision_hitbox
      for block in all(blocks) do
-      if check_overlap(top_hitbox, block) then
-       collision = 'top'
-      elseif check_overlap(bottom_hitbox, block) then
-       collision = 'bottom'
-      elseif check_overlap(right_hitbox, block) then
-       collision = 'right'
-      elseif check_overlap(left_hitbox, block) then
-       collision = 'left'
+      if check_overlap(self:hitboxes().top_hitbox, block) then
+       collision_hitbox = self:hitboxes().top_hitbox
+      elseif check_overlap(self:hitboxes().bottom_hitbox, block) then
+       collision_hitbox = self:hitboxes().bottom_hitbox
+      elseif check_overlap(self:hitboxes().right_hitbox, block) then
+       collision_hitbox = self:hitboxes().right_hitbox
+      elseif check_overlap(self:hitboxes().left_hitbox, block) then
+       collision_hitbox = self:hitboxes().left_hitbox
       end
      end
-     return collision
+     return collision_hitbox
     end,
     draw_step = function(step)
      spr(step.sprite, step.x, step.y)
@@ -101,34 +85,21 @@ function run_level()
      if center_of(self).y >= center_of(self.destination).y then self.y -= self.y_speed end
      if center_of(self).y <= center_of(self.destination).y then self.y += self.y_speed end
 
-     -- refactor to use case
-     if self:check_block_collision() == 'top' then 
+     if self:check_block_collision() then
       self:generate_destination()
-      self.y += self.y_speed
-     elseif self:check_block_collision() == 'bottom' then
-      self:generate_destination()
-      self.y -= self.y_speed
-     elseif self:check_block_collision() == 'left' then
-      self:generate_destination()
-      self.x += self.x_speed
-     elseif self:check_block_collision() == 'right' then
-      self:generate_destination()
-      self.x -= self.x_speed
+      local hitbox_that_collided = self:check_block_collision()
+      if hitbox_that_collided == self:hitboxes().top_hitbox then 
+       self.y += self.y_speed
+      elseif hitbox_that_collided == self:hitboxes().bottom_hitbox then
+       self.y -= self.y_speed
+      elseif hitbox_that_collided == self:hitboxes().left_hitbox then
+       self.x += self.x_speed
+      elseif hitbox_that_collided == self:hitboxes().right_hitbox then
+       self.x -= self.x_speed
+      end
      end
 
      if self:destination_reached() then self:generate_destination() end
-
-
-
-      -- if self:destination_reached() then
-      --   self:generate_destination()
-      -- else
-      --   if center_of(self).x >= center_of(self.destination).x then self.x -= self.x_speed end
-      --   if center_of(self).x <= center_of(self.destination).x then self.x += self.x_speed end
-      --   if center_of(self).y >= center_of(self.destination).y then self.y -= self.y_speed end
-      --   if center_of(self).y <= center_of(self.destination).y then self.y += self.y_speed end
-      -- end
-      -- self:check_block_collision()
     end,
     manage_move_history = function(self)
      if frame_counter % 10 == 0 then 
