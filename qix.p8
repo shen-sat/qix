@@ -1,4 +1,4 @@
- pico-8 cartridge // http://www.pico-8.com
+pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
 function _init()
@@ -110,6 +110,11 @@ function run_level()
     end
   }
 
+  player = {
+   x = 0,
+   y = 0,
+   sprite = 1
+  }
   frame_counter = 0
 
   blocks = {}
@@ -121,15 +126,72 @@ end
 function level_update()
   frame_counter += 1
   qix:update()
+
+  -- local compass_points = get_compass_points({ player.x, player.y })
+  if btn(0) then
+
+   local path_point = false
+
+   if pget(player.x - 1, player.y) != 0 then 
+    local compass_points = get_compass_points({ x = player.x - 1, y = player.y })
+    
+    if pget(compass_points.south.x, compass_points.south.y) == 0 then path_point = true end
+    if pget(compass_points.north.x, compass_points.north.y) == 0 then path_point = true end
+    if pget(compass_points.east.x, compass_points.east.y) == 0 then path_point = true end
+    if pget(compass_points.west.x, compass_points.west.y) == 0 then path_point = true end
+   end
+
+   if path_point then player.x -= 1 end
+
+  end
+  if btn(1) then 
+   local path_point = false
+   if pget(player.x + 1, player.y) != 0 then 
+    local compass_points = get_compass_points({ x = player.x + 1, y = player.y })
+    
+    if pget(compass_points.south.x, compass_points.south.y) == 0 then path_point = true end
+    if pget(compass_points.north.x, compass_points.north.y) == 0 then path_point = true end
+    if pget(compass_points.east.x, compass_points.east.y) == 0 then path_point = true end
+    if pget(compass_points.west.x, compass_points.west.y) == 0 then path_point = true end
+
+   end
+   if path_point then player.x += 1 end
+  elseif btn(2) then
+   local path_point = false 
+   if pget(player.x, player.y - 1) != 0 then 
+    local compass_points = get_compass_points({ x = player.x, y = player.y - 1 })
+    
+    if pget(compass_points.south.x, compass_points.south.y) == 0 then path_point = true end
+    if pget(compass_points.north.x, compass_points.north.y) == 0 then path_point = true end
+    if pget(compass_points.east.x, compass_points.east.y) == 0 then path_point = true end
+    if pget(compass_points.west.x, compass_points.west.y) == 0 then path_point = true end
+   end
+   if path_point then player.y -= 1 end
+  elseif btn(3) then
+   local path_point = false
+   if pget(player.x, player.y + 1) != 0 then 
+    local compass_points = get_compass_points({ x = player.x, y = player.y + 1 })
+    
+    if pget(compass_points.south.x, compass_points.south.y) == 0 then path_point = true end
+    if pget(compass_points.north.x, compass_points.north.y) == 0 then path_point = true end
+    if pget(compass_points.east.x, compass_points.east.y) == 0 then path_point = true end
+    if pget(compass_points.west.x, compass_points.west.y) == 0 then path_point = true end
+   end
+   if path_point then player.y += 1 end
+  end
+
+
 end
 
 function level_draw()
   -- higher something is here, the further in the background it is
   cls()
-  rect(0,0,127,127,7) --border
-  qix:draw()
+  rect(0,0,127,127,4) --border
+  spr(player.sprite,player.x - 3,player.y - 3)
+  -- qix:draw()
+  
   -- destination hitbox
-  rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
+  -- rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
 end
 
 function check_overlap(rect_a, rect_b)
@@ -158,6 +220,15 @@ function point_in_rect(point_obj, rect_obj)
   local width = rect_obj.width
   local height = rect_obj.height
   return x > left and x < (left + width) and y > top and y < (top + height)
+end
+
+function get_compass_points(point)
+ return {
+  north = { x = point.x, y = point.y - 1 },
+  east = { x = point.x + 1, y = point.y },
+  south = { x = point.x, y = point.y + 1 },
+  west = { x = point.x - 1, y = point.y }
+ }
 end
 
 --------------------------------------------------------------------------------
@@ -204,11 +275,11 @@ end
  -- add(blocks, right_block)
 
 __gfx__
-aaaaaaaa000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-aaaaaaaa000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-aaaaaaaa000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-aaaaaaaa000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-aaaaaaaa000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-aaaaaaaa000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-aaaaaaaa000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+aaaaaaaa000b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+aaaaaaaa00b0b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+aaaaaaaa0b000b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+aaaaaaaab00b00b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+aaaaaaaa0b000b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+aaaaaaaa00b0b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+aaaaaaaa000b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 aaaaaaaa000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
