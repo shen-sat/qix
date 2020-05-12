@@ -115,6 +115,7 @@ function run_level()
    y = 0,
    sprite = 1
   }
+
   frame_counter = 0
 
   blocks = {}
@@ -127,60 +128,64 @@ function level_update()
   frame_counter += 1
   qix:update()
 
-  -- local compass_points = get_compass_points({ player.x, player.y })
+  local path_point = false
   if btn(0) then
-
-   local path_point = false
-
+   
    if pget(player.x - 1, player.y) != 0 then 
     local compass_points = get_compass_points({ x = player.x - 1, y = player.y })
+
+    path_point = check_compass_points_contain_color(compass_points, 0)
     
-    if pget(compass_points.south.x, compass_points.south.y) == 0 then path_point = true end
-    if pget(compass_points.north.x, compass_points.north.y) == 0 then path_point = true end
-    if pget(compass_points.east.x, compass_points.east.y) == 0 then path_point = true end
-    if pget(compass_points.west.x, compass_points.west.y) == 0 then path_point = true end
+    -- if pget(compass_points.south.x, compass_points.south.y) == 0 then path_point = true end
+    -- if pget(compass_points.north.x, compass_points.north.y) == 0 then path_point = true end
+    -- if pget(compass_points.east.x, compass_points.east.y) == 0 then path_point = true end
+    -- if pget(compass_points.west.x, compass_points.west.y) == 0 then path_point = true end
    end
 
    if path_point then player.x -= 1 end
+  elseif btn(1) then
 
-  end
-  if btn(1) then 
-   local path_point = false
    if pget(player.x + 1, player.y) != 0 then 
     local compass_points = get_compass_points({ x = player.x + 1, y = player.y })
-    
-    if pget(compass_points.south.x, compass_points.south.y) == 0 then path_point = true end
-    if pget(compass_points.north.x, compass_points.north.y) == 0 then path_point = true end
-    if pget(compass_points.east.x, compass_points.east.y) == 0 then path_point = true end
-    if pget(compass_points.west.x, compass_points.west.y) == 0 then path_point = true end
 
+    path_point = check_compass_points_contain_color(compass_points, 0)
+    
+    -- if pget(compass_points.south.x, compass_points.south.y) == 0 then path_point = true end
+    -- if pget(compass_points.north.x, compass_points.north.y) == 0 then path_point = true end
+    -- if pget(compass_points.east.x, compass_points.east.y) == 0 then path_point = true end
+    -- if pget(compass_points.west.x, compass_points.west.y) == 0 then path_point = true end
    end
+
    if path_point then player.x += 1 end
   elseif btn(2) then
-   local path_point = false 
+
    if pget(player.x, player.y - 1) != 0 then 
     local compass_points = get_compass_points({ x = player.x, y = player.y - 1 })
+
+    path_point = check_compass_points_contain_color(compass_points, 0)
     
-    if pget(compass_points.south.x, compass_points.south.y) == 0 then path_point = true end
-    if pget(compass_points.north.x, compass_points.north.y) == 0 then path_point = true end
-    if pget(compass_points.east.x, compass_points.east.y) == 0 then path_point = true end
-    if pget(compass_points.west.x, compass_points.west.y) == 0 then path_point = true end
+    -- if pget(compass_points.south.x, compass_points.south.y) == 0 then path_point = true end
+    -- if pget(compass_points.north.x, compass_points.north.y) == 0 then path_point = true end
+    -- if pget(compass_points.east.x, compass_points.east.y) == 0 then path_point = true end
+    -- if pget(compass_points.west.x, compass_points.west.y) == 0 then path_point = true end
    end
+
    if path_point then player.y -= 1 end
   elseif btn(3) then
-   local path_point = false
+
    if pget(player.x, player.y + 1) != 0 then 
     local compass_points = get_compass_points({ x = player.x, y = player.y + 1 })
+
+    path_point = check_compass_points_contain_color(compass_points, 0)
     
-    if pget(compass_points.south.x, compass_points.south.y) == 0 then path_point = true end
-    if pget(compass_points.north.x, compass_points.north.y) == 0 then path_point = true end
-    if pget(compass_points.east.x, compass_points.east.y) == 0 then path_point = true end
-    if pget(compass_points.west.x, compass_points.west.y) == 0 then path_point = true end
+    -- if pget(compass_points.south.x, compass_points.south.y) == 0 then path_point = true end
+    -- if pget(compass_points.north.x, compass_points.north.y) == 0 then path_point = true end
+    -- if pget(compass_points.east.x, compass_points.east.y) == 0 then path_point = true end
+    -- if pget(compass_points.west.x, compass_points.west.y) == 0 then path_point = true end
    end
+
    if path_point then player.y += 1 end
   end
-
-
 end
 
 function level_draw()
@@ -224,11 +229,19 @@ end
 
 function get_compass_points(point)
  return {
-  north = { x = point.x, y = point.y - 1 },
-  east = { x = point.x + 1, y = point.y },
-  south = { x = point.x, y = point.y + 1 },
-  west = { x = point.x - 1, y = point.y }
+  { x = point.x, y = point.y - 1 }, --north
+  { x = point.x + 1, y = point.y }, --east
+  { x = point.x, y = point.y + 1 }, --south
+  { x = point.x - 1, y = point.y } --west
  }
+end
+
+function check_compass_points_contain_color(compass_points, col)
+ local contains_color = false
+ for cp in all(compass_points) do
+  if pget(cp.x, cp.y) == col then contains_color = true end
+ end
+ return contains_color
 end
 
 --------------------------------------------------------------------------------
