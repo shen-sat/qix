@@ -128,32 +128,34 @@ function level_update()
   frame_counter += 1
   qix:update()
 
+  local path_color = 4
+  local background_color = 0
   if btn(0) then
    local next_point_x, next_point_y = player.x - 1, player.y   
-   if pget(next_point_x, next_point_y) != 0 then 
+   if pget(next_point_x, next_point_y) == path_color then 
     local compass_points = get_compass_points({ x = next_point_x, y = next_point_y })
-    if check_compass_points_contain_color(compass_points, 0) then player.x -= 1 end
+    if check_compass_points_contain_color(compass_points, background_color) then player.x -= 1 end
    end
-
-  elseif btn(1) then
+  end
+  if btn(1) then
    local next_point_x, next_point_y = player.x + 1, player.y
-   if pget(next_point_x, next_point_y) != 0 then 
+   if pget(next_point_x, next_point_y) == path_color then 
     local compass_points = get_compass_points({ x = next_point_x, y = next_point_y })
-    if check_compass_points_contain_color(compass_points, 0) then player.x += 1 end
+    if check_compass_points_contain_color(compass_points, background_color) then player.x += 1 end
    end
-
-  elseif btn(2) then
+  end
+  if btn(2) then
    local next_point_x, next_point_y = player.x, player.y - 1
-   if pget(next_point_x, next_point_y) != 0 then 
+   if pget(next_point_x, next_point_y) == path_color then 
     local compass_points = get_compass_points({ x = next_point_x, y = next_point_y })
-    if check_compass_points_contain_color(compass_points, 0) then player.y -= 1 end
+    if check_compass_points_contain_color(compass_points, background_color) then player.y -= 1 end
    end
-
-  elseif btn(3) then
+  end
+  if btn(3) then
    local next_point_x, next_point_y = player.x, player.y + 1
-   if pget(next_point_x, next_point_y) != 0 then 
+   if pget(next_point_x, next_point_y) == path_color then 
     local compass_points = get_compass_points({ x = next_point_x, y = next_point_y })
-    if check_compass_points_contain_color(compass_points, 0) then player.y += 1 end
+    if check_compass_points_contain_color(compass_points, background_color) then player.y += 1 end
    end
   end
 end
@@ -161,9 +163,14 @@ end
 function level_draw()
   -- higher something is here, the further in the background it is
   cls()
+  rectfill(1,1,127 -1,60 - 1,2)
+  line(1,60,127 - 1,60,4)
+  line(64, 1, 64, 60, 4)
+
   rect(0,0,127,127,4) --border
   spr(player.sprite,player.x - 3,player.y - 3)
   -- qix:draw()
+
   
   -- destination hitbox
   -- rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
