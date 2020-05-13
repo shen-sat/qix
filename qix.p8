@@ -112,7 +112,7 @@ function run_level()
 
   player = {
    x = 0,
-   y = 0,
+   y = 127,
    sprite = 1
   }
 
@@ -130,32 +130,57 @@ function level_update()
 
   local path_color = 4
   local background_color = 0
+  local fill_color = 2
   if btn(0) then
    local next_point_x, next_point_y = player.x - 1, player.y   
    if pget(next_point_x, next_point_y) == path_color then 
     local compass_points = get_compass_points({ x = next_point_x, y = next_point_y })
-    if check_compass_points_contain_color(compass_points, background_color) then player.x -= 1 end
+    if pixel_in_border(next_point_x, next_point_y) then
+     if check_compass_points_contain_color(compass_points, fill_color) == false then
+      player.x -= 1
+     end
+    elseif check_compass_points_contain_color(compass_points, background_color) then
+     player.x -= 1
+    end
    end
   end
   if btn(1) then
    local next_point_x, next_point_y = player.x + 1, player.y
-   if pget(next_point_x, next_point_y) == path_color then 
+   if pget(next_point_x, next_point_y) == path_color then
     local compass_points = get_compass_points({ x = next_point_x, y = next_point_y })
-    if check_compass_points_contain_color(compass_points, background_color) then player.x += 1 end
+    if pixel_in_border(next_point_x, next_point_y) then
+     if check_compass_points_contain_color(compass_points, fill_color) == false then
+      player.x += 1
+     end
+    elseif check_compass_points_contain_color(compass_points, background_color) then
+     player.x += 1
+    end
    end
   end
   if btn(2) then
    local next_point_x, next_point_y = player.x, player.y - 1
    if pget(next_point_x, next_point_y) == path_color then 
     local compass_points = get_compass_points({ x = next_point_x, y = next_point_y })
-    if check_compass_points_contain_color(compass_points, background_color) then player.y -= 1 end
+    if pixel_in_border(next_point_x, next_point_y) then
+     if check_compass_points_contain_color(compass_points, fill_color) == false then
+      player.y -= 1
+     end
+    elseif check_compass_points_contain_color(compass_points, background_color) then
+     player.y -= 1
+    end
    end
   end
   if btn(3) then
    local next_point_x, next_point_y = player.x, player.y + 1
    if pget(next_point_x, next_point_y) == path_color then 
     local compass_points = get_compass_points({ x = next_point_x, y = next_point_y })
-    if check_compass_points_contain_color(compass_points, background_color) then player.y += 1 end
+    if pixel_in_border(next_point_x, next_point_y) then
+     if check_compass_points_contain_color(compass_points, fill_color) == false then
+      player.y += 1
+     end
+    elseif check_compass_points_contain_color(compass_points, background_color) then
+     player.y += 1
+    end
    end
   end
 end
@@ -171,7 +196,6 @@ function level_draw()
   spr(player.sprite,player.x - 3,player.y - 3)
   -- qix:draw()
 
-  
   -- destination hitbox
   -- rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
 end
@@ -219,6 +243,10 @@ function check_compass_points_contain_color(compass_points, col)
   if pget(cp.x, cp.y) == col then contains_color = true end
  end
  return contains_color
+end
+
+function pixel_in_border(x,y)
+ if x < 1 or x > 126 or y < 1 or y > 126 then return true end
 end
 
 --------------------------------------------------------------------------------
