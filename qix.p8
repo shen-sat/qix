@@ -132,9 +132,9 @@ function level_update()
   local background_color = 0
   local fill_color = 2
   if btn(0) then
-   local next_point_x, next_point_y = player.x - 1, player.y   
-   if pget(next_point_x, next_point_y) == path_color then 
-    local compass_points = get_compass_points({ x = next_point_x, y = next_point_y })
+   local next_point_x, next_point_y = player.x - 1, player.y
+   if pget(next_point_x, next_point_y) == path_color then
+    local compass_points = get_compass_points(next_point_x, next_point_y)
     if pixel_in_border(next_point_x, next_point_y) then
      if check_compass_points_contain_color(compass_points, fill_color) == false then
       player.x -= 1
@@ -147,7 +147,7 @@ function level_update()
   if btn(1) then
    local next_point_x, next_point_y = player.x + 1, player.y
    if pget(next_point_x, next_point_y) == path_color then
-    local compass_points = get_compass_points({ x = next_point_x, y = next_point_y })
+    local compass_points = get_compass_points(next_point_x, next_point_y)
     if pixel_in_border(next_point_x, next_point_y) then
      if check_compass_points_contain_color(compass_points, fill_color) == false then
       player.x += 1
@@ -160,7 +160,7 @@ function level_update()
   if btn(2) then
    local next_point_x, next_point_y = player.x, player.y - 1
    if pget(next_point_x, next_point_y) == path_color then 
-    local compass_points = get_compass_points({ x = next_point_x, y = next_point_y })
+    local compass_points = get_compass_points(next_point_x, next_point_y)
     if pixel_in_border(next_point_x, next_point_y) then
      if check_compass_points_contain_color(compass_points, fill_color) == false then
       player.y -= 1
@@ -173,7 +173,7 @@ function level_update()
   if btn(3) then
    local next_point_x, next_point_y = player.x, player.y + 1
    if pget(next_point_x, next_point_y) == path_color then 
-    local compass_points = get_compass_points({ x = next_point_x, y = next_point_y })
+    local compass_points = get_compass_points(next_point_x, next_point_y)
     if pixel_in_border(next_point_x, next_point_y) then
      if check_compass_points_contain_color(compass_points, fill_color) == false then
       player.y += 1
@@ -228,12 +228,12 @@ function point_in_rect(point_obj, rect_obj)
   return x > left and x < (left + width) and y > top and y < (top + height)
 end
 
-function get_compass_points(point)
+function get_compass_points(point_x,point_y)
  return {
-  { x = point.x, y = point.y - 1 }, --north
-  { x = point.x + 1, y = point.y }, --east
-  { x = point.x, y = point.y + 1 }, --south
-  { x = point.x - 1, y = point.y } --west
+  { x = point_x, y = point_y - 1 }, --north
+  { x = point_x + 1, y = point_y }, --east
+  { x = point_x, y = point_y + 1 }, --south
+  { x = point_x - 1, y = point_y } --west
  }
 end
 
