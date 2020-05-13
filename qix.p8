@@ -136,11 +136,13 @@ function level_update()
    if pget(next_point_x, next_point_y) == path_color then
     local compass_points = get_compass_points(next_point_x, next_point_y)
     if pixel_in_border(next_point_x, next_point_y) then
-     if check_compass_points_contain_color(compass_points, fill_color) == false then
-      player.x -= 1
+     if not compass_points_contain_color(compass_points, fill_color) then
+      player.x = next_point_x
+      player.y = next_point_y
      end
-    elseif check_compass_points_contain_color(compass_points, background_color) then
-     player.x -= 1
+    elseif compass_points_contain_color(compass_points, background_color) then
+     player.x = next_point_x
+     player.y = next_point_y
     end
    end
   end
@@ -149,11 +151,13 @@ function level_update()
    if pget(next_point_x, next_point_y) == path_color then
     local compass_points = get_compass_points(next_point_x, next_point_y)
     if pixel_in_border(next_point_x, next_point_y) then
-     if check_compass_points_contain_color(compass_points, fill_color) == false then
-      player.x += 1
+     if not compass_points_contain_color(compass_points, fill_color) then
+      player.x = next_point_x
+      player.y = next_point_y
      end
-    elseif check_compass_points_contain_color(compass_points, background_color) then
-     player.x += 1
+    elseif compass_points_contain_color(compass_points, background_color) then
+     player.x = next_point_x
+     player.y = next_point_y
     end
    end
   end
@@ -162,11 +166,13 @@ function level_update()
    if pget(next_point_x, next_point_y) == path_color then 
     local compass_points = get_compass_points(next_point_x, next_point_y)
     if pixel_in_border(next_point_x, next_point_y) then
-     if check_compass_points_contain_color(compass_points, fill_color) == false then
-      player.y -= 1
+     if not compass_points_contain_color(compass_points, fill_color) then
+      player.x = next_point_x
+      player.y = next_point_y
      end
-    elseif check_compass_points_contain_color(compass_points, background_color) then
-     player.y -= 1
+    elseif compass_points_contain_color(compass_points, background_color) then
+     player.x = next_point_x
+     player.y = next_point_y
     end
    end
   end
@@ -175,11 +181,13 @@ function level_update()
    if pget(next_point_x, next_point_y) == path_color then 
     local compass_points = get_compass_points(next_point_x, next_point_y)
     if pixel_in_border(next_point_x, next_point_y) then
-     if check_compass_points_contain_color(compass_points, fill_color) == false then
-      player.y += 1
+     if not compass_points_contain_color(compass_points, fill_color) then
+      player.x = next_point_x
+      player.y = next_point_y
      end
-    elseif check_compass_points_contain_color(compass_points, background_color) then
-     player.y += 1
+    elseif compass_points_contain_color(compass_points, background_color) then
+     player.x = next_point_x
+     player.y = next_point_y
     end
    end
   end
@@ -237,7 +245,7 @@ function get_compass_points(point_x,point_y)
  }
 end
 
-function check_compass_points_contain_color(compass_points, col)
+function compass_points_contain_color(compass_points, col)
  local contains_color = false
  for cp in all(compass_points) do
   if pget(cp.x, cp.y) == col then contains_color = true end
