@@ -113,12 +113,30 @@ function run_level()
   player = {
    x = 0,
    y = 127,
-   sprite = 1
+   sprite = 1,
+   passive_move = function(self, next_point_x, next_point_y)
+    if pget(next_point_x, next_point_y) == path_color then
+     local compass_points = get_compass_points(next_point_x, next_point_y)
+     if pixel_in_border(next_point_x, next_point_y) then
+      if not compass_points_contain_color(compass_points, fill_color) then
+       self.x = next_point_x
+       self.y = next_point_y
+      end
+     elseif compass_points_contain_color(compass_points, background_color) then
+      self.x = next_point_x
+      self.y = next_point_y
+     end
+    end
+   end
   }
 
   frame_counter = 0
 
   blocks = {}
+
+  path_color = 4
+  background_color = 0
+  fill_color = 2
 
   game.update = level_update
   game.draw = level_draw
@@ -128,68 +146,21 @@ function level_update()
   frame_counter += 1
   qix:update()
 
-  local path_color = 4
-  local background_color = 0
-  local fill_color = 2
   if btn(0) then
    local next_point_x, next_point_y = player.x - 1, player.y
-   if pget(next_point_x, next_point_y) == path_color then
-    local compass_points = get_compass_points(next_point_x, next_point_y)
-    if pixel_in_border(next_point_x, next_point_y) then
-     if not compass_points_contain_color(compass_points, fill_color) then
-      player.x = next_point_x
-      player.y = next_point_y
-     end
-    elseif compass_points_contain_color(compass_points, background_color) then
-     player.x = next_point_x
-     player.y = next_point_y
-    end
-   end
+   player:passive_move(next_point_x, next_point_y)
   end
   if btn(1) then
    local next_point_x, next_point_y = player.x + 1, player.y
-   if pget(next_point_x, next_point_y) == path_color then
-    local compass_points = get_compass_points(next_point_x, next_point_y)
-    if pixel_in_border(next_point_x, next_point_y) then
-     if not compass_points_contain_color(compass_points, fill_color) then
-      player.x = next_point_x
-      player.y = next_point_y
-     end
-    elseif compass_points_contain_color(compass_points, background_color) then
-     player.x = next_point_x
-     player.y = next_point_y
-    end
-   end
+   player:passive_move(next_point_x, next_point_y)
   end
   if btn(2) then
    local next_point_x, next_point_y = player.x, player.y - 1
-   if pget(next_point_x, next_point_y) == path_color then 
-    local compass_points = get_compass_points(next_point_x, next_point_y)
-    if pixel_in_border(next_point_x, next_point_y) then
-     if not compass_points_contain_color(compass_points, fill_color) then
-      player.x = next_point_x
-      player.y = next_point_y
-     end
-    elseif compass_points_contain_color(compass_points, background_color) then
-     player.x = next_point_x
-     player.y = next_point_y
-    end
-   end
+   player:passive_move(next_point_x, next_point_y)
   end
   if btn(3) then
    local next_point_x, next_point_y = player.x, player.y + 1
-   if pget(next_point_x, next_point_y) == path_color then 
-    local compass_points = get_compass_points(next_point_x, next_point_y)
-    if pixel_in_border(next_point_x, next_point_y) then
-     if not compass_points_contain_color(compass_points, fill_color) then
-      player.x = next_point_x
-      player.y = next_point_y
-     end
-    elseif compass_points_contain_color(compass_points, background_color) then
-     player.x = next_point_x
-     player.y = next_point_y
-    end
-   end
+   player:passive_move(next_point_x, next_point_y)
   end
 end
 
