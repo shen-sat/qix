@@ -113,9 +113,11 @@ function run_level()
   player = {
    x = 0,
    y = 127,
+   prev_x = 0,
+   prev_y = 127, 
    sprite = 1,
-   passive_move = function(self, next_point_x, next_point_y)
-    if pget(next_point_x, next_point_y) == path_color then
+   path_move = function(self, next_point_x, next_point_y)
+    -- if pget(next_point_x, next_point_y) == path_color then
      local compass_points = get_compass_points(next_point_x, next_point_y)
      if pixel_in_border(next_point_x, next_point_y) then
       if not compass_points_contain_color(compass_points, fill_color) then
@@ -126,13 +128,14 @@ function run_level()
       self.x = next_point_x
       self.y = next_point_y
      end
-    end
+    -- end
    end
   }
 
   frame_counter = 0
 
   blocks = {}
+  lines = {}
 
   path_color = 4
   background_color = 0
@@ -148,35 +151,73 @@ function level_update()
 
   if btn(0) then
    local next_point_x, next_point_y = player.x - 1, player.y
-   player:passive_move(next_point_x, next_point_y)
-  end
-  if btn(1) then
+   if pget(next_point_x, next_point_y) == path_color then 
+    player:path_move(next_point_x, next_point_y)
+   elseif pget(next_point_x, next_point_y) == background_color and not pixel_outside_screen(next_point_x, next_point_y) then
+    if btn(5) then
+     player.x -= 1
+     create_line()
+    end
+   end
+  elseif btn(1) then
    local next_point_x, next_point_y = player.x + 1, player.y
-   player:passive_move(next_point_x, next_point_y)
-  end
-  if btn(2) then
+   if pget(next_point_x, next_point_y) == path_color then 
+    player:path_move(next_point_x, next_point_y)
+   elseif pget(next_point_x, next_point_y) == background_color and not pixel_outside_screen(next_point_x, next_point_y) then
+    if btn(5) then
+     player.x += 1
+     create_line()
+    end
+   end
+  elseif btn(2) then
    local next_point_x, next_point_y = player.x, player.y - 1
-   player:passive_move(next_point_x, next_point_y)
-  end
-  if btn(3) then
+   if pget(next_point_x, next_point_y) == path_color then 
+    player:path_move(next_point_x, next_point_y)
+   elseif pget(next_point_x, next_point_y) == background_color and not pixel_outside_screen(next_point_x, next_point_y) then
+    if btn(5) then
+     player.y -= 1
+     create_line()
+    end
+   end
+  elseif btn(3) then
    local next_point_x, next_point_y = player.x, player.y + 1
-   player:passive_move(next_point_x, next_point_y)
+   if pget(next_point_x, next_point_y) == path_color then 
+    player:path_move(next_point_x, next_point_y)
+   elseif pget(next_point_x, next_point_y) == background_color and not pixel_outside_screen(next_point_x, next_point_y) then
+    if btn(5) then
+     player.y += 1
+     create_line()
+    end
+   end
   end
+
+  player.prev_x = player.x
+  player.prev_y = player.y
 end
 
 function level_draw()
   -- higher something is here, the further in the background it is
   cls()
-  rectfill(1,1,127 -1,60 - 1,2)
-  line(1,60,127 - 1,60,4)
-  line(64, 1, 64, 60, 4)
+
+  for l in all(lines) do
+   line(l.x0,l.y0,l.x1,l.y1,l.col)
+  end
 
   rect(0,0,127,127,4) --border
-  spr(player.sprite,player.x - 3,player.y - 3)
   -- qix:draw()
+
+  
+
+  spr(player.sprite,player.x - 3,player.y - 3)
+  print(flag,1,1,7)
 
   -- destination hitbox
   -- rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
+end
+
+function create_line()
+ line_part = { x0 = player.x, y0 = player.y, x1 = player.prev_x, y1 = player.prev_y, col = 10 }
+ add(lines,line_part)
 end
 
 function check_overlap(rect_a, rect_b)
@@ -228,12 +269,15 @@ function pixel_in_border(x,y)
  if x < 1 or x > 126 or y < 1 or y > 126 then return true end
 end
 
---------------------------------------------------------------------------------
+function pixel_outside_screen(x,y)
+ if x < 0 or x > 127 or y < 0 or y > 127 then return true end
+end
 
--- draw block
- -- for block in all(blocks) do
- --  rectfill(block.x,block.y,block.x + block.width - 1,block.y + block.height - 1,3)
- -- end
+--------------------------------------------------------------------------------
+-- draw paths and rects for player to move along
+-- rectfill(1,1,127 -1,60 - 1,2)
+-- line(1,60,127 - 1,60,4)
+-- line(64, 1, 64, 60, 4)
 
 -- control qix manually
  -- if btn(0) then qix.x -= 1 end
@@ -270,6 +314,11 @@ end
  -- add(blocks, bottom_block)
  -- add(blocks, left_block)
  -- add(blocks, right_block)
+
+ -- draw blocks
+  -- for block in all(blocks) do
+  --  rectfill(block.x,block.y,block.x + block.width - 1,block.y + block.height - 1,3)
+  -- end
 
 __gfx__
 aaaaaaaa000b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
