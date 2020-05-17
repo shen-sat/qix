@@ -117,7 +117,6 @@ function run_level()
    prev_y = 127, 
    sprite = 1,
    path_move = function(self, next_point_x, next_point_y)
-    -- if pget(next_point_x, next_point_y) == path_color then
      local compass_points = get_compass_points(next_point_x, next_point_y)
      if pixel_in_border(next_point_x, next_point_y) then
       if not compass_points_contain_color(compass_points, fill_color) then
@@ -128,7 +127,15 @@ function run_level()
       self.x = next_point_x
       self.y = next_point_y
      end
-    -- end
+   end,
+   move_and_create_line = function(self,x,y)
+    self.x = x
+    self.y = y
+    self:create_line()
+   end,
+   create_line = function(self)
+    line_part = { x0 = self.x, y0 = self.y, x1 = self.prev_x, y1 = self.prev_y, col = draw_color }
+    add(lines,line_part)
    end
   }
 
@@ -137,6 +144,7 @@ function run_level()
   blocks = {}
   lines = {}
 
+  draw_color = 10
   path_color = 4
   background_color = 0
   fill_color = 2
@@ -151,43 +159,31 @@ function level_update()
 
   if btn(0) then
    local next_point_x, next_point_y = player.x - 1, player.y
-   if pget(next_point_x, next_point_y) == path_color then 
+   if pget(next_point_x, next_point_y) == path_color then
     player:path_move(next_point_x, next_point_y)
-   elseif pget(next_point_x, next_point_y) == background_color and not pixel_outside_screen(next_point_x, next_point_y) then
-    if btn(5) then
-     player.x -= 1
-     create_line()
-    end
+   elseif pixel_is_drawable(next_point_x,next_point_y) then
+    if btn(5) then player:move_and_create_line(next_point_x, next_point_y) end
    end
   elseif btn(1) then
    local next_point_x, next_point_y = player.x + 1, player.y
    if pget(next_point_x, next_point_y) == path_color then 
     player:path_move(next_point_x, next_point_y)
-   elseif pget(next_point_x, next_point_y) == background_color and not pixel_outside_screen(next_point_x, next_point_y) then
-    if btn(5) then
-     player.x += 1
-     create_line()
-    end
+   elseif pixel_is_drawable(next_point_x,next_point_y) then
+    if btn(5) then player:move_and_create_line(next_point_x, next_point_y) end
    end
   elseif btn(2) then
    local next_point_x, next_point_y = player.x, player.y - 1
    if pget(next_point_x, next_point_y) == path_color then 
     player:path_move(next_point_x, next_point_y)
-   elseif pget(next_point_x, next_point_y) == background_color and not pixel_outside_screen(next_point_x, next_point_y) then
-    if btn(5) then
-     player.y -= 1
-     create_line()
-    end
+   elseif pixel_is_drawable(next_point_x,next_point_y) then
+    if btn(5) then player:move_and_create_line(next_point_x, next_point_y) end
    end
   elseif btn(3) then
    local next_point_x, next_point_y = player.x, player.y + 1
    if pget(next_point_x, next_point_y) == path_color then 
     player:path_move(next_point_x, next_point_y)
-   elseif pget(next_point_x, next_point_y) == background_color and not pixel_outside_screen(next_point_x, next_point_y) then
-    if btn(5) then
-     player.y += 1
-     create_line()
-    end
+   elseif pixel_is_drawable(next_point_x,next_point_y) then
+    if btn(5) then player:move_and_create_line(next_point_x, next_point_y) end
    end
   end
 
@@ -206,18 +202,12 @@ function level_draw()
   rect(0,0,127,127,4) --border
   -- qix:draw()
 
-  
-
   spr(player.sprite,player.x - 3,player.y - 3)
-  print(flag,1,1,7)
-
-  -- destination hitbox
-  -- rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
 end
 
-function create_line()
- line_part = { x0 = player.x, y0 = player.y, x1 = player.prev_x, y1 = player.prev_y, col = 10 }
- add(lines,line_part)
+function pixel_is_drawable(x,y)
+ local compass_points = get_compass_points(x,y)
+ return pget(x,y) == background_color and not pixel_outside_screen(x,y) and no_of_colored_compass_points(compass_points,draw_color) < 1
 end
 
 function check_overlap(rect_a, rect_b)
@@ -263,6 +253,14 @@ function compass_points_contain_color(compass_points, col)
   if pget(cp.x, cp.y) == col then contains_color = true end
  end
  return contains_color
+end
+
+function no_of_colored_compass_points(compass_points, col)
+ local colored_points = 0
+ for cp in all(compass_points) do
+  if pget(cp.x, cp.y) == col then colored_points +=1 end
+ end
+ return colored_points
 end
 
 function pixel_in_border(x,y)
@@ -319,6 +317,9 @@ end
   -- for block in all(blocks) do
   --  rectfill(block.x,block.y,block.x + block.width - 1,block.y + block.height - 1,3)
   -- end
+
+  -- destination hitbox
+  -- rect(qix.destination.x,qix.destination.y,qix.destination.x + qix.destination.width - 1,qix.destination.y + qix.destination.height - 1,7)
 
 __gfx__
 aaaaaaaa000b00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
