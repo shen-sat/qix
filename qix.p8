@@ -123,7 +123,7 @@ function run_level()
        self.x = next_point_x
        self.y = next_point_y
       end
-     elseif compass_points_contain_color(compass_points, background_color) then
+     elseif compass_points_contain_color(compass_points, background_color) then -- ie next point is a path not in between two shapes
       self.x = next_point_x
       self.y = next_point_y
      end
@@ -166,9 +166,10 @@ function level_update()
   qix:update()
 
   if btn(0) then
-   local next_point_x, next_point_y = player.x - 1, player.y
+   local next_point_x, next_point_y = player.x - 2, player.y
    if pget(next_point_x, next_point_y) == path_color then
     player:path_move(next_point_x, next_point_y)
+    if btn(5) then player:create_line() end
     if shape_initiated then shape_finished = true end
    elseif pixel_is_drawable(next_point_x,next_point_y) then
     if btn(5) then 
@@ -178,11 +179,14 @@ function level_update()
       shape_initiated = true
      end
     end
+   elseif pixel_outside_screen(next_point_x,next_point_y) then
+    player.x = 0 
    end
   elseif btn(1) then
-   local next_point_x, next_point_y = player.x + 1, player.y
+   local next_point_x, next_point_y = player.x + 2, player.y
    if pget(next_point_x, next_point_y) == path_color then 
     player:path_move(next_point_x, next_point_y)
+    if btn(5) then player:create_line() end
     if shape_initiated then shape_finished = true end
    elseif pixel_is_drawable(next_point_x,next_point_y) then
     if btn(5) then 
@@ -192,11 +196,14 @@ function level_update()
       shape_initiated = true
      end
     end
+   elseif pixel_outside_screen(next_point_x,next_point_y) then
+    player.x = 127
    end
   elseif btn(2) then
-   local next_point_x, next_point_y = player.x, player.y - 1
+   local next_point_x, next_point_y = player.x, player.y - 2
    if pget(next_point_x, next_point_y) == path_color then 
     player:path_move(next_point_x, next_point_y)
+    if btn(5) then player:create_line() end
     if shape_initiated then shape_finished = true end
    elseif pixel_is_drawable(next_point_x,next_point_y) then
     if btn(5) then 
@@ -206,11 +213,14 @@ function level_update()
       shape_initiated = true
      end
     end
+   elseif pixel_outside_screen(next_point_x,next_point_y) then
+    player.y = 0
    end
   elseif btn(3) then
-   local next_point_x, next_point_y = player.x, player.y + 1
+   local next_point_x, next_point_y = player.x, player.y + 2
    if pget(next_point_x, next_point_y) == path_color then 
     player:path_move(next_point_x, next_point_y)
+    if btn(5) then player:create_line() end
     if shape_initiated then shape_finished = true end
    elseif pixel_is_drawable(next_point_x,next_point_y) then
     if btn(5) then 
@@ -220,6 +230,8 @@ function level_update()
       shape_initiated = true
      end
     end
+   elseif pixel_outside_screen(next_point_x,next_point_y) then
+    player.y = 127
    end
   end
 
@@ -253,7 +265,7 @@ end
 
 function pixel_is_drawable(x,y)
  local compass_points = get_compass_points(x,y)
- return pget(x,y) == background_color and not pixel_outside_screen(x,y) and no_of_colored_compass_points(compass_points,draw_color) < 1
+ return pget(x,y) == background_color and not pixel_outside_screen(x,y)
 end
 
 function check_overlap(rect_a, rect_b)
