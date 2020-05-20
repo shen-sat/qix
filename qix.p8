@@ -116,132 +116,32 @@ function run_level()
    prev_x = 0,
    prev_y = 127, 
    sprite = 1,
-   path_move = function(self, next_point_x, next_point_y)
-     local compass_points = get_compass_points(next_point_x, next_point_y)
-     if pixel_in_border(next_point_x, next_point_y) then
-      if not compass_points_contain_color(compass_points, fill_color) then
-       self.x = next_point_x
-       self.y = next_point_y
-      end
-     elseif compass_points_contain_color(compass_points, background_color) then -- ie next point is a path not in between two shapes
-      self.x = next_point_x
-      self.y = next_point_y
-     end
-   end,
-   move_and_create_line = function(self,x,y)
-    self.x = x
-    self.y = y
-    self:create_line()
-   end,
-   create_line = function(self)
-    line_part = { x0 = self.x, y0 = self.y, x1 = self.prev_x, y1 = self.prev_y, col = draw_color }
-    add(lines,line_part)
-   end
+   speed = 2
   }
 
   frame_counter = 0
-
-  blocks = {}
-  lines = {}
 
   draw_color = 10
   path_color = 4
   background_color = 0
   fill_color = 2
 
-  shape_initiated = false
-  shape_finished = false
-  shape_start_pixel = {
-   x,
-   y
-  }
-
-
   game.update = level_update
   game.draw = level_draw
+
+  counter = false
 end
 
 function level_update()
   frame_counter += 1
   qix:update()
 
-  if btn(0) then
-   local next_point_x, next_point_y = player.x - 2, player.y
-   if pget(next_point_x, next_point_y) == path_color then
-    player:path_move(next_point_x, next_point_y)
-    if btn(5) then player:create_line() end
-    if shape_initiated then shape_finished = true end
-   elseif pixel_is_drawable(next_point_x,next_point_y) then
-    if btn(5) then 
-     player:move_and_create_line(next_point_x, next_point_y)
-     if not shape_initiated then 
-      shape_start_pixel.x, shape_start_pixel.y = player.x, player.y
-      shape_initiated = true
-     end
-    end
-   elseif pixel_outside_screen(next_point_x,next_point_y) then
-    player.x = 0 
-   end
-  elseif btn(1) then
-   local next_point_x, next_point_y = player.x + 2, player.y
-   if pget(next_point_x, next_point_y) == path_color then 
-    player:path_move(next_point_x, next_point_y)
-    if btn(5) then player:create_line() end
-    if shape_initiated then shape_finished = true end
-   elseif pixel_is_drawable(next_point_x,next_point_y) then
-    if btn(5) then 
-     player:move_and_create_line(next_point_x, next_point_y)
-     if not shape_initiated then 
-      shape_start_pixel.x, shape_start_pixel.y = player.x, player.y
-      shape_initiated = true
-     end
-    end
-   elseif pixel_outside_screen(next_point_x,next_point_y) then
-    player.x = 127
-   end
-  elseif btn(2) then
-   local next_point_x, next_point_y = player.x, player.y - 2
-   if pget(next_point_x, next_point_y) == path_color then 
-    player:path_move(next_point_x, next_point_y)
-    if btn(5) then player:create_line() end
-    if shape_initiated then shape_finished = true end
-   elseif pixel_is_drawable(next_point_x,next_point_y) then
-    if btn(5) then 
-     player:move_and_create_line(next_point_x, next_point_y)
-     if not shape_initiated then 
-      shape_start_pixel.x, shape_start_pixel.y = player.x, player.y
-      shape_initiated = true
-     end
-    end
-   elseif pixel_outside_screen(next_point_x,next_point_y) then
-    player.y = 0
-   end
-  elseif btn(3) then
-   local next_point_x, next_point_y = player.x, player.y + 2
-   if pget(next_point_x, next_point_y) == path_color then 
-    player:path_move(next_point_x, next_point_y)
-    if btn(5) then player:create_line() end
-    if shape_initiated then shape_finished = true end
-   elseif pixel_is_drawable(next_point_x,next_point_y) then
-    if btn(5) then 
-     player:move_and_create_line(next_point_x, next_point_y)
-     if not shape_initiated then 
-      shape_start_pixel.x, shape_start_pixel.y = player.x, player.y
-      shape_initiated = true
-     end
-    end
-   elseif pixel_outside_screen(next_point_x,next_point_y) then
-    player.y = 127
-   end
+  if btn(2) then
+   local next_x = player.x
+   local next_y = player.y - player.speed
+   player_move(next_x, next_y, 'up', false)
   end
 
-  if shape_initiated and shape_finished then
-   shape_initiated, shape_finished = false, false
-   -- calculate area
-  end
-
-  player.prev_x = player.x
-  player.prev_y = player.y
 end
 
 function level_draw()
@@ -255,12 +155,18 @@ function level_draw()
   rect(0,0,127,127,4) --border
   -- qix:draw()
 
-  print(shape_initiated,1,1,7)
-  print(shape_finished,1,10,7)
-  print(shape_start_pixel.x,1,20,7)
-  print(shape_start_pixel.y,1,30,7)
-
   spr(player.sprite,player.x - 3,player.y - 3)
+end
+
+function player_move(next_x, next_y, direction, player_move_called_already)
+ if pget(next_x, next_y) == path_color then
+  player.y = next_y
+  player.x = next_x
+ else
+  if player_move_called_already then return end
+  if direction == 'up' then next_y += 1 end
+  player_move(next_x, next_y, direction, true)
+ end
 end
 
 function pixel_is_drawable(x,y)
@@ -330,6 +236,18 @@ function pixel_outside_screen(x,y)
 end
 
 --------------------------------------------------------------------------------
+--draw paths to test player path movement
+-- draw paths and rects for player to move along
+-- rectfill(1,1,127 -1,60 - 1,2)
+-- line(1,60,127 - 1,60,4)
+-- line(64, 1, 64, 60, 4)
+
+-- create line
+-- create_line = function(self)
+--  line_part = { x0 = self.x, y0 = self.y, x1 = self.prev_x, y1 = self.prev_y, col = draw_color }
+--  add(lines,line_part)
+-- end
+
 -- draw paths and rects for player to move along
 -- rectfill(1,1,127 -1,60 - 1,2)
 -- line(1,60,127 - 1,60,4)
