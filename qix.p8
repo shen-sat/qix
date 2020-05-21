@@ -126,10 +126,11 @@ function run_level()
   background_color = 0
   fill_color = 2
 
+  lines = {}
+  player_is_drawing = false
+
   game.update = level_update
   game.draw = level_draw
-
-  counter = false
 end
 
 function level_update()
@@ -139,19 +140,20 @@ function level_update()
   if btn(2) then
    local next_x, next_y = player.x, player.y - player.speed
    player_move(next_x, next_y, 'up', false)
-  end
-  if btn(3) then
+  elseif btn(3) then
    local next_x, next_y = player.x, player.y + player.speed
    player_move(next_x, next_y, 'down', false)
-  end
-  if btn(0) then
+  elseif btn(0) then
    local next_x, next_y = player.x - player.speed, player.y
    player_move(next_x, next_y, 'left', false)
-  end
-  if btn(1) then
+  elseif btn(1) then
    local next_x, next_y = player.x + player.speed, player.y
    player_move(next_x, next_y, 'right', false)
   end
+
+
+  player.prev_x = player.x
+  player.prev_y = player.y
 
 end
 
@@ -171,11 +173,19 @@ function level_draw()
 
 end
 
+function create_line()
+ local line_part = { x0 = player.x, y0 = player.y, x1 = player.prev_x, y1 = player.prev_y, col = draw_color }
+ add(lines,line_part)
+end
+
 function player_move(next_x, next_y, direction, player_move_called_already)
  local compass_points = get_compass_points(next_x, next_y)
 
  if pget(next_x, next_y) == path_color and compass_points_contain_color(compass_points, background_color) then
   player.x, player.y = next_x, next_y
+ elseif pixel_is_drawable(next_x, next_y) then
+  player.x, player.y = next_x, next_y
+  create_line()
  else
   if player_move_called_already then return end
   if direction == 'up' then 
