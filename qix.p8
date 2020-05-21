@@ -127,7 +127,9 @@ function run_level()
   fill_color = 2
 
   lines = {}
-  player_is_drawing = false
+  
+  started_drawing = false
+  finished_drawing = false
 
   game.update = level_update
   game.draw = level_draw
@@ -151,6 +153,12 @@ function level_update()
    player_move(next_x, next_y, 'right', false)
   end
 
+  if started_drawing and finished_drawing then
+   -- calculate area
+   started_drawing = false
+   finished_drawing = false
+  end
+
   player.prev_x = player.x
   player.prev_y = player.y
 
@@ -159,6 +167,9 @@ end
 function level_draw()
   -- higher something is here, the further in the background it is
   cls()
+
+  print(started_drawing,10,10,7)
+  print(finished_drawing,20,20,7)
 
   for l in all(lines) do
    line(l.x0,l.y0,l.x1,l.y1,l.col)
@@ -181,23 +192,25 @@ function player_move(next_x, next_y, direction, player_move_called_already)
  local compass_points = get_compass_points(next_x, next_y)
 
  if pget(next_x, next_y) == path_color and compass_points_contain_color(compass_points, background_color) then
+  if started_drawing then finished_drawing = true end
   player.x, player.y = next_x, next_y
   if btn(5) then create_line() end -- when moving from drawing a line to a path, we need to continue drawing a line 
  elseif pixel_is_drawable(next_x, next_y) and btn(5) then
+  started_drawing = true
   player.x, player.y = next_x, next_y
   create_line()
  else
-  if player_move_called_already then return end
-  if direction == 'up' then 
-   next_y += 1
-  elseif direction == 'down' then
-   next_y -= 1
-  elseif direction == 'left' then
-   next_x += 1
-  elseif direction == 'right' then
-   next_x -= 1
-  end
-  player_move(next_x, next_y, direction, true)
+  -- if player_move_called_already then return end
+  -- if direction == 'up' then 
+  --  next_y += 1
+  -- elseif direction == 'down' then
+  --  next_y -= 1
+  -- elseif direction == 'left' then
+  --  next_x += 1
+  -- elseif direction == 'right' then
+  --  next_x -= 1
+  -- end
+  -- player_move(next_x, next_y, direction, true)
  end
 end
 
