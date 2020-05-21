@@ -151,7 +151,6 @@ function level_update()
    player_move(next_x, next_y, 'right', false)
   end
 
-
   player.prev_x = player.x
   player.prev_y = player.y
 
@@ -183,7 +182,8 @@ function player_move(next_x, next_y, direction, player_move_called_already)
 
  if pget(next_x, next_y) == path_color and compass_points_contain_color(compass_points, background_color) then
   player.x, player.y = next_x, next_y
- elseif pixel_is_drawable(next_x, next_y) then
+  if btn(5) then create_line() end -- when moving from drawing a line to a path, we need to continue drawing a line 
+ elseif pixel_is_drawable(next_x, next_y) and btn(5) then
   player.x, player.y = next_x, next_y
   create_line()
  else
@@ -203,7 +203,7 @@ end
 
 function pixel_is_drawable(x,y)
  local compass_points = get_compass_points(x,y)
- return pget(x,y) == background_color and not pixel_outside_screen(x,y)
+ return pget(x,y) == background_color and not pixel_outside_border(x,y)
 end
 
 function check_overlap(rect_a, rect_b)
@@ -263,8 +263,8 @@ function pixel_in_border(x,y)
  if x < 1 or x > 126 or y < 1 or y > 126 then return true end
 end
 
-function pixel_outside_screen(x,y)
- if x < 0 or x > 127 or y < 0 or y > 127 then return true end
+function pixel_outside_border(x,y)
+ if x < 0 or x > 126 or y < 0 or y > 126 then return true end
 end
 
 --------------------------------------------------------------------------------
