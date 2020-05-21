@@ -112,7 +112,7 @@ function run_level()
 
   player = {
    x = 0,
-   y = 127,
+   y = 126,
    prev_x = 0,
    prev_y = 127, 
    sprite = 1,
@@ -137,9 +137,20 @@ function level_update()
   qix:update()
 
   if btn(2) then
-   local next_x = player.x
-   local next_y = player.y - player.speed
+   local next_x, next_y = player.x, player.y - player.speed
    player_move(next_x, next_y, 'up', false)
+  end
+  if btn(3) then
+   local next_x, next_y = player.x, player.y + player.speed
+   player_move(next_x, next_y, 'down', false)
+  end
+  if btn(0) then
+   local next_x, next_y = player.x - player.speed, player.y
+   player_move(next_x, next_y, 'left', false)
+  end
+  if btn(1) then
+   local next_x, next_y = player.x + player.speed, player.y
+   player_move(next_x, next_y, 'right', false)
   end
 
 end
@@ -152,19 +163,33 @@ function level_draw()
    line(l.x0,l.y0,l.x1,l.y1,l.col)
   end
 
-  rect(0,0,127,127,4) --border
+  rect(0,0,126,126,4) --border
   -- qix:draw()
 
+  -- draw paths and rects for player to move along
+  -- rectfill(1,1,127 -1,60 - 1,2)
+  line(1,60,127 - 1,60,4)
+  -- line(64, 1, 64, 60, 4)
+  
   spr(player.sprite,player.x - 3,player.y - 3)
+
+
 end
 
 function player_move(next_x, next_y, direction, player_move_called_already)
  if pget(next_x, next_y) == path_color then
-  player.y = next_y
-  player.x = next_x
+  player.x, player.y = next_x, next_y
  else
   if player_move_called_already then return end
-  if direction == 'up' then next_y += 1 end
+  if direction == 'up' then 
+   next_y += 1
+  elseif direction == 'down' then
+   next_y -= 1
+  elseif direction == 'left' then
+   next_x += 1
+  elseif direction == 'right' then
+   next_x -= 1
+  end
   player_move(next_x, next_y, direction, true)
  end
 end
