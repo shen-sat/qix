@@ -130,6 +130,9 @@ function run_level()
   
   started_drawing = false
   finished_drawing = false
+  first_drawn_pixel_recordable = true
+
+  counter = 0
 
   game.update = level_update
   game.draw = level_draw
@@ -153,10 +156,17 @@ function level_update()
    player_move(next_x, next_y, 'right', false)
   end
 
-  if started_drawing and finished_drawing then
-   -- calculate area
-   started_drawing = false
-   finished_drawing = false
+  if started_drawing then
+   if first_drawn_pixel_recordable == true then
+    first_drawn_pixel_recordable = false
+    counter += 1
+   end
+   if finished_drawing then
+    first_drawn_pixel_recordable = true
+    -- -- calculate area
+    started_drawing = false
+    finished_drawing = false
+   end
   end
 
   player.prev_x = player.x
@@ -170,6 +180,7 @@ function level_draw()
 
   print(started_drawing,10,10,7)
   print(finished_drawing,20,20,7)
+  print(counter,30,30,7)
 
   for l in all(lines) do
    line(l.x0,l.y0,l.x1,l.y1,l.col)
