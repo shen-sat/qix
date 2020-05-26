@@ -132,7 +132,7 @@ function run_level()
   finished_drawing = false
   first_drawn_pixel_recordable = true
 
-  counter = 0
+  vertices = {}
 
   game.update = level_update
   game.draw = level_draw
@@ -159,9 +159,44 @@ function level_update()
   if started_drawing then
    if first_drawn_pixel_recordable == true then
     first_drawn_pixel_recordable = false
-    counter += 1
    end
    if finished_drawing then
+    local first_vertix_x, first_vertix_y = player.x, player.y
+    add(vertices,first_vertix_x)
+    add(vertices,first_vertix_y)
+
+    local next_x, next_y = player.x, player.y
+
+    while pget(next_x - 1,next_y) != background_color do
+     next_x -= 1
+    end
+
+    local next_vertix_x, next_vertix_y = next_x, next_y -- this needs to be made local after you get fill working
+    add(vertices,next_vertix_x)
+    add(vertices,next_vertix_y)
+
+    -- pathfinding from here
+
+    while pget(next_x ,next_y + 1) != background_color do
+     next_y += 1
+    end   
+
+    next_vertix_x, next_vertix_y = next_x, next_y -- this needs to be made local after you get fill working
+    add(vertices,next_vertix_x)
+    add(vertices,next_vertix_y)
+
+    local compass_points = get_compass_points(next_x, next_y)
+    local is_vertix = compass_points_contain_color(compass_points, draw_color)
+    while is_vertix == false do
+     next_x += 1
+     compass_points = get_compass_points(next_x, next_y)
+     is_vertix = compass_points_contain_color(compass_points, draw_color)
+    end
+
+    next_vertix_x, next_vertix_y = next_x, next_y -- this needs to be made local after you get fill working
+    add(vertices,next_vertix_x)
+    add(vertices,next_vertix_y)
+
     first_drawn_pixel_recordable = true
     -- -- calculate area
     started_drawing = false
@@ -177,21 +212,21 @@ end
 function level_draw()
   -- higher something is here, the further in the background it is
   cls()
+  -- qix:draw()
 
-  print(started_drawing,10,10,7)
-  print(finished_drawing,20,20,7)
-  print(counter,30,30,7)
+  -- print(started_drawing,10,10,7)
+  -- print(finished_drawing,20,20,7)
+  
+  render_poly(vertices, fill_color)
 
   for l in all(lines) do
    line(l.x0,l.y0,l.x1,l.y1,l.col)
   end
 
   rect(0,0,126,126,4) --border
-  -- qix:draw()
+  
   
   spr(player.sprite,player.x - 3,player.y - 3)
-
-
 end
 
 function create_line()
@@ -356,79 +391,94 @@ end
   -- draws a filled convex polygon
   -- v is an array of vertices
   -- {x1, y1, x2, y2} etc
-  -- function render_poly(v,col)
-  --  col=col or 5
+function render_poly(v,col)
+ col=col or 5
 
-  --  -- initialize scan extents
-  --  -- with ludicrous values
-  --  local x1,x2={},{}
-  --  for y=0,127 do
-  --   x1[y],x2[y]=128,-1
-  --  end
-  --  local y1,y2=128,-1
+ -- initialize scan extents
+ -- with ludicrous values
+ local x1,x2={},{}
+ for y=0,127 do
+  x1[y],x2[y]=128,-1
+ end
+ local y1,y2=128,-1
 
-  --  -- scan convert each pair
-  --  -- of vertices
-  --  for i=1, #v/2 do
-  --   local next=i+1
-  --   if (next>#v/2) next=1
+ -- scan convert each pair
+ -- of vertices
+ for i=1, #v/2 do
+  local next=i+1
+  if (next>#v/2) next=1
 
-  --   -- alias verts from array
-  --   local vx1=flr(v[i*2-1])
-  --   local vy1=flr(v[i*2])
-  --   local vx2=flr(v[next*2-1])
-  --   local vy2=flr(v[next*2])
+  -- alias verts from array
+  local vx1=flr(v[i*2-1])
+  local vy1=flr(v[i*2])
+  local vx2=flr(v[next*2-1])
+  local vy2=flr(v[next*2])
 
-  --   if vy1>vy2 then
-  --    -- swap verts
-  --    local tempx,tempy=vx1,vy1
-  --    vx1,vy1=vx2,vy2
-  --    vx2,vy2=tempx,tempy
-  --   end 
+  if vy1>vy2 then
+   -- swap verts
+   local tempx,tempy=vx1,vy1
+   vx1,vy1=vx2,vy2
+   vx2,vy2=tempx,tempy
+  end 
 
-  --   -- skip horizontal edges and
-  --   -- offscreen polys
-  --   if vy1~=vy2 and vy1<128 and
-  --    vy2>=0 then
+  -- skip horizontal edges and
+  -- offscreen polys
+  if vy1~=vy2 and vy1<128 and
+   vy2>=0 then
 
-  --    -- clip edge to screen bounds
-  --    if vy1<0 then
-  --     vx1=(0-vy1)*(vx2-vx1)/(vy2-vy1)+vx1
-  --     vy1=0
-  --    end
-  --    if vy2>127 then
-  --     vx2=(127-vy1)*(vx2-vx1)/(vy2-vy1)+vx1
-  --     vy2=127
-  --    end
+   -- clip edge to screen bounds
+   if vy1<0 then
+    vx1=(0-vy1)*(vx2-vx1)/(vy2-vy1)+vx1
+    vy1=0
+   end
+   if vy2>127 then
+    vx2=(127-vy1)*(vx2-vx1)/(vy2-vy1)+vx1
+    vy2=127
+   end
 
-  --    -- iterate horizontal scans
-  --    for y=vy1,vy2 do
-  --     if (y<y1) y1=y
-  --     if (y>y2) y2=y
+   -- iterate horizontal scans
+   for y=vy1,vy2 do
+    if (y<y1) y1=y
+    if (y>y2) y2=y
 
-  --     -- calculate the x coord for
-  --     -- this y coord using math!
-  --     x=(y-vy1)*(vx2-vx1)/(vy2-vy1)+vx1
+    -- calculate the x coord for
+    -- this y coord using math!
+    x=(y-vy1)*(vx2-vx1)/(vy2-vy1)+vx1
 
-  --     if (x<x1[y]) x1[y]=x
-  --     if (x>x2[y]) x2[y]=x
-  --    end 
-  --   end
-  --  end
+    if (x<x1[y]) x1[y]=x
+    if (x>x2[y]) x2[y]=x
+   end 
+  end
+ end
+ 
+ local contains_qix = false
+ for y_point=0,127 do
+  local first_point_x = x1[y_point] 
+  local second_point_x = x2[y_point]
 
-  --  -- render scans
-  --  for y=y1,y2 do
-  --   local sx1=flr(max(0,x1[y]))
-  --   local sx2=flr(min(127,x2[y]))
+  while first_point_x <= second_point_x do
+   if pget(first_point_x,y_point) == 7 then
+    -- contains_qix = true
+   end
+   first_point_x +=1
+  end
+ end
 
-  --   local c=col*16+col
-  --   local ofs1=flr((sx1+1)/2)
-  --   local ofs2=flr((sx2+1)/2)
-  --   memset(0x6000+(y*64)+ofs1,c,ofs2-ofs1)
-  --   pset(sx1,y,c)
-  --   pset(sx2,y,c)
-  --  end 
-  -- end
+ -- render scans
+ if contains_qix == false then
+  for y=y1,y2 do
+   local sx1=flr(max(0,x1[y]))
+   local sx2=flr(min(127,x2[y]))
+
+   local c=col*16+col
+   local ofs1=flr((sx1+1)/2)
+   local ofs2=flr((sx2+1)/2)
+   memset(0x6000+(y*64)+ofs1,c,ofs2-ofs1)
+   pset(sx1,y,7)
+   pset(sx2,y,7)
+  end
+ end
+end
 
 __gfx__
 aaaaaaaa00bbb0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

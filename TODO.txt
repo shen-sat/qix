@@ -1,0 +1,3 @@
+Player can move around the border even when shape is on border - player should
+only move around border if a shape isn't in the way - other wise player should
+move off border and around shape when it gets to the shape.
