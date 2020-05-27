@@ -119,12 +119,18 @@ function run_level()
    speed = 2
   }
 
+  temp_qix = {
+   x = 2,
+   y = 2
+  }
+
   frame_counter = 0
 
   draw_color = 10
   path_color = 4
   background_color = 0
   fill_color = 2
+  pathfinding_color = 11
 
   lines = {}
   
@@ -161,41 +167,58 @@ function level_update()
     first_drawn_pixel_recordable = false
    end
    if finished_drawing then
+    temp_vertices = {}
     local first_vertix_x, first_vertix_y = player.x, player.y
-    add(vertices,first_vertix_x)
-    add(vertices,first_vertix_y)
+    add(temp_vertices,first_vertix_x)
+    add(temp_vertices,first_vertix_y)
+
+    local compass_points = get_compass_points(first_vertix_x, first_vertix_y)
+    local next_point = get_compass_points_with_color(compass_points, path_color)[1]
+
+    local x_counter = next_point.x - first_vertix_x
+    local y_counter = next_point.y - first_vertix_y
 
     local next_x, next_y = player.x, player.y
 
-    while pget(next_x - 1,next_y) != background_color do
-     next_x -= 1
+    while pget(next_x + x_counter,next_y + y_counter) != background_color do
+     pset(next_x + x_counter,next_y + y_counter, pathfinding_color)
+     next_y += y_counter
+     next_x += x_counter
     end
 
-    local next_vertix_x, next_vertix_y = next_x, next_y -- this needs to be made local after you get fill working
-    add(vertices,next_vertix_x)
-    add(vertices,next_vertix_y)
+    local vertix_x, vertix_y = next_x, next_y
+    add(temp_vertices,vertix_x)
+    add(temp_vertices,vertix_y)
 
     -- pathfinding from here
+    local last_verticed_reached = false
 
-    while pget(next_x ,next_y + 1) != background_color do
-     next_y += 1
-    end   
+    while last_verticed_reached == false do
+     local compass_points = get_compass_points(vertix_x, vertix_y)
+     local next_point = get_compass_points_with_color(compass_points, path_color)[1] --this only returns the first point with path color, may need reworking to take into account more complex situations
 
-    next_vertix_x, next_vertix_y = next_x, next_y -- this needs to be made local after you get fill working
-    add(vertices,next_vertix_x)
-    add(vertices,next_vertix_y)
+     local x_counter = next_point.x - vertix_x
+     local y_counter = next_point.y - vertix_y
 
-    local compass_points = get_compass_points(next_x, next_y)
-    local is_vertix = compass_points_contain_color(compass_points, draw_color)
-    while is_vertix == false do
-     next_x += 1
-     compass_points = get_compass_points(next_x, next_y)
-     is_vertix = compass_points_contain_color(compass_points, draw_color)
+     last_verticed_reached = compass_points_contain_color(compass_points, draw_color)
+
+     while pget(next_x + x_counter,next_y + y_counter) != background_color and last_verticed_reached == false do
+      pset(next_x + x_counter,next_y + y_counter,pathfinding_color)
+      next_y += y_counter
+      next_x += x_counter
+      compass_points = get_compass_points(next_x, next_y)
+      last_verticed_reached = compass_points_contain_color(compass_points, draw_color)
+     end   
+
+     vertix_x, vertix_y = next_x, next_y -- this needs to be made local after you get fill working
+     add(temp_vertices,vertix_x)
+     add(temp_vertices,vertix_y)
     end
-
-    next_vertix_x, next_vertix_y = next_x, next_y -- this needs to be made local after you get fill working
-    add(vertices,next_vertix_x)
-    add(vertices,next_vertix_y)
+    if poly_contains_qix(temp_vertices) == false then
+     for v in all(temp_vertices) do
+      add(vertices,v)
+     end
+    end
 
     first_drawn_pixel_recordable = true
     -- -- calculate area
@@ -213,10 +236,7 @@ function level_draw()
   -- higher something is here, the further in the background it is
   cls()
   -- qix:draw()
-
-  -- print(started_drawing,10,10,7)
-  -- print(finished_drawing,20,20,7)
-  
+  pset(temp_qix.x,temp_qix.y,7)
   render_poly(vertices, fill_color)
 
   for l in all(lines) do
@@ -308,6 +328,17 @@ function compass_points_contain_color(compass_points, col)
   if pget(cp.x, cp.y) == col then contains_color = true end
  end
  return contains_color
+end
+
+function get_compass_points_with_color(compass_points, col)
+ local points = {}
+ for cp in all(compass_points) do
+  if pget(cp.x, cp.y) == col then 
+   local point = { x=cp.x, y=cp.y }
+   add(points,point)
+  end
+ end
+ return points
 end
 
 function no_of_colored_compass_points(compass_points, col)
@@ -451,21 +482,21 @@ function render_poly(v,col)
   end
  end
  
- local contains_qix = false
- for y_point=0,127 do
-  local first_point_x = x1[y_point] 
-  local second_point_x = x2[y_point]
+ -- local contains_qix = false
+ -- for y_point=0,127 do
+ --  local first_point_x = x1[y_point] 
+ --  local second_point_x = x2[y_point]
 
-  while first_point_x <= second_point_x do
-   if pget(first_point_x,y_point) == 7 then
-    -- contains_qix = true
-   end
-   first_point_x +=1
-  end
- end
+ --  while first_point_x <= second_point_x do
+ --   if pget(first_point_x,y_point) == 7 then
+ --    contains_qix = true
+ --   end
+ --   first_point_x +=1
+ --  end
+ -- end
 
  -- render scans
- if contains_qix == false then
+ 
   for y=y1,y2 do
    local sx1=flr(max(0,x1[y]))
    local sx2=flr(min(127,x2[y]))
@@ -477,7 +508,82 @@ function render_poly(v,col)
    pset(sx1,y,7)
    pset(sx2,y,7)
   end
+ -- end
+end
+
+function poly_contains_qix(v)
+ col=col or 5
+
+ -- initialize scan extents
+ -- with ludicrous values
+ local x1,x2={},{}
+ for y=0,127 do
+  x1[y],x2[y]=128,-1
  end
+ local y1,y2=128,-1
+
+ -- scan convert each pair
+ -- of vertices
+ for i=1, #v/2 do
+  local next=i+1
+  if (next>#v/2) next=1
+
+  -- alias verts from array
+  local vx1=flr(v[i*2-1])
+  local vy1=flr(v[i*2])
+  local vx2=flr(v[next*2-1])
+  local vy2=flr(v[next*2])
+
+  if vy1>vy2 then
+   -- swap verts
+   local tempx,tempy=vx1,vy1
+   vx1,vy1=vx2,vy2
+   vx2,vy2=tempx,tempy
+  end 
+
+  -- skip horizontal edges and
+  -- offscreen polys
+  if vy1~=vy2 and vy1<128 and
+   vy2>=0 then
+
+   -- clip edge to screen bounds
+   if vy1<0 then
+    vx1=(0-vy1)*(vx2-vx1)/(vy2-vy1)+vx1
+    vy1=0
+   end
+   if vy2>127 then
+    vx2=(127-vy1)*(vx2-vx1)/(vy2-vy1)+vx1
+    vy2=127
+   end
+
+   -- iterate horizontal scans
+   for y=vy1,vy2 do
+    if (y<y1) y1=y
+    if (y>y2) y2=y
+
+    -- calculate the x coord for
+    -- this y coord using math!
+    x=(y-vy1)*(vx2-vx1)/(vy2-vy1)+vx1
+
+    if (x<x1[y]) x1[y]=x
+    if (x>x2[y]) x2[y]=x
+   end 
+  end
+ end
+ 
+ local contains_qix = false
+ for y_point=0,127 do
+  local first_point_x = x1[y_point] 
+  local second_point_x = x2[y_point]
+
+  while first_point_x <= second_point_x do
+   if first_point_x == temp_qix.x and y_point == temp_qix.y then
+    contains_qix = true
+   end
+   first_point_x +=1
+  end
+ end
+ return contains_qix
 end
 
 __gfx__
