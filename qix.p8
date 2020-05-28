@@ -120,8 +120,8 @@ function run_level()
   }
 
   temp_qix = {
-   x = 2,
-   y = 2
+   x = 20,
+   y = 20
   }
 
   frame_counter = 0
@@ -167,56 +167,59 @@ function level_update()
     first_drawn_pixel_recordable = false
    end
    if finished_drawing then
-    temp_vertices = {}
     local first_vertix_x, first_vertix_y = player.x, player.y
-    add(temp_vertices,first_vertix_x)
-    add(temp_vertices,first_vertix_y)
 
     local compass_points = get_compass_points(first_vertix_x, first_vertix_y)
-    local next_point = get_compass_points_with_color(compass_points, path_color)[1]
+    local next_points = get_compass_points_with_color(compass_points, path_color)
 
-    local x_counter = next_point.x - first_vertix_x
-    local y_counter = next_point.y - first_vertix_y
+    for next_point in all(next_points) do
+     local temp_vertices = {}
+     add(temp_vertices,first_vertix_x)
+     add(temp_vertices,first_vertix_y)
 
-    local next_x, next_y = player.x, player.y
+     local x_counter = next_point.x - first_vertix_x
+     local y_counter = next_point.y - first_vertix_y
 
-    while pget(next_x + x_counter,next_y + y_counter) != background_color do
-     pset(next_x + x_counter,next_y + y_counter, pathfinding_color)
-     next_y += y_counter
-     next_x += x_counter
-    end
+     local next_x, next_y = player.x, player.y
 
-    local vertix_x, vertix_y = next_x, next_y
-    add(temp_vertices,vertix_x)
-    add(temp_vertices,vertix_y)
-
-    -- pathfinding from here
-    local last_verticed_reached = false
-
-    while last_verticed_reached == false do
-     local compass_points = get_compass_points(vertix_x, vertix_y)
-     local next_point = get_compass_points_with_color(compass_points, path_color)[1] --this only returns the first point with path color, may need reworking to take into account more complex situations
-
-     local x_counter = next_point.x - vertix_x
-     local y_counter = next_point.y - vertix_y
-
-     last_verticed_reached = compass_points_contain_color(compass_points, draw_color)
-
-     while pget(next_x + x_counter,next_y + y_counter) != background_color and last_verticed_reached == false do
-      pset(next_x + x_counter,next_y + y_counter,pathfinding_color)
+     while pget(next_x + x_counter,next_y + y_counter) != background_color do
+      pset(next_x + x_counter,next_y + y_counter, pathfinding_color)
       next_y += y_counter
       next_x += x_counter
-      compass_points = get_compass_points(next_x, next_y)
-      last_verticed_reached = compass_points_contain_color(compass_points, draw_color)
-     end   
+     end
 
-     vertix_x, vertix_y = next_x, next_y -- this needs to be made local after you get fill working
+     local vertix_x, vertix_y = next_x, next_y
      add(temp_vertices,vertix_x)
      add(temp_vertices,vertix_y)
-    end
-    if poly_contains_qix(temp_vertices) == false then
-     for v in all(temp_vertices) do
-      add(vertices,v)
+
+     -- pathfinding from here
+     local last_verticed_reached = false
+
+     while last_verticed_reached == false do
+      local compass_points = get_compass_points(vertix_x, vertix_y)
+      local next_point = get_compass_points_with_color(compass_points, path_color)[1] --this only returns the first point with path color, may need reworking to take into account more complex situations
+
+      local x_counter = next_point.x - vertix_x
+      local y_counter = next_point.y - vertix_y
+
+      last_verticed_reached = compass_points_contain_color(compass_points, draw_color)
+
+      while pget(next_x + x_counter,next_y + y_counter) != background_color and last_verticed_reached == false do
+       pset(next_x + x_counter,next_y + y_counter,pathfinding_color)
+       next_y += y_counter
+       next_x += x_counter
+       compass_points = get_compass_points(next_x, next_y)
+       last_verticed_reached = compass_points_contain_color(compass_points, draw_color)
+      end   
+
+      vertix_x, vertix_y = next_x, next_y -- this needs to be made local after you get fill working
+      add(temp_vertices,vertix_x)
+      add(temp_vertices,vertix_y)
+     end
+     if poly_contains_qix(temp_vertices) == false then
+      for v in all(temp_vertices) do
+       add(vertices,v)
+      end
      end
     end
 
