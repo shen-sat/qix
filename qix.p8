@@ -130,7 +130,7 @@ function run_level()
   path_color = 4
   background_color = 0
   fill_color = 2
-  pathfinding_color = 11
+  pathfinding_color = 12
 
   lines = {}
   
@@ -163,41 +163,28 @@ function level_update()
 
   if started_drawing then
    if finished_drawing then
-    local first_vertix_x, first_vertix_y = player.x, player.y
-
-    local compass_points = get_compass_points(first_vertix_x, first_vertix_y)
-    local two_starting_points = get_compass_points_with_color(compass_points, path_color)
+    local two_starting_points = get_compass_points_with_color(get_compass_points(player.x, player.y), path_color)
 
     for point in all(two_starting_points) do
+     local vertix_x, vertix_y = player.x, player.y
+
      local temp_vertices = {}
 
-     add(temp_vertices,first_vertix_x)
-     add(temp_vertices,first_vertix_y)
-
-     local x_counter = point.x - first_vertix_x
-     local y_counter = point.y - first_vertix_y
-
-     local current_x, current_y = first_vertix_x, first_vertix_y
-
-     while pget(current_x + x_counter,current_y + y_counter) != background_color do
-      pset(current_x + x_counter,current_y + y_counter, pathfinding_color)
-      current_y += y_counter
-      current_x += x_counter
-     end
-
-     local vertix_x, vertix_y = current_x, current_y
      add(temp_vertices,vertix_x)
      add(temp_vertices,vertix_y)
 
+     local current_point = point
+
      while true do
-      local compass_points = get_compass_points(vertix_x, vertix_y)
-      local continuing_point = get_compass_points_with_color(compass_points, path_color)[1] --this only returns the first point with path color, may need reworking to take into account more complex situations
-
-      local x_counter = continuing_point.x - vertix_x
-      local y_counter = continuing_point.y - vertix_y
-
-      local last_vertix_reached = compass_points_contain_color(compass_points, draw_color)
-
+      --assign the current point
+      local current_x, current_y = current_point.x, current_point.y
+      --work out the direction of pathfinding
+      local x_counter = current_x - vertix_x
+      local y_counter = current_y - vertix_y
+      --check if current point is the final vertix (probbaly it won't be, but let's check anyway)
+      compass_points = get_compass_points(current_x, current_y)
+      last_vertix_reached = compass_points_contain_color(compass_points, draw_color)
+      --check if current point is an l-junction or a final vertix. if not, move along to next pixel
       while pget(current_x + x_counter,current_y + y_counter) != background_color and not last_vertix_reached do
        pset(current_x + x_counter,current_y + y_counter,pathfinding_color)
        current_y += y_counter
@@ -205,12 +192,15 @@ function level_update()
        compass_points = get_compass_points(current_x, current_y)
        last_vertix_reached = compass_points_contain_color(compass_points, draw_color)
       end   
-
-      vertix_x, vertix_y = current_x, current_y -- this needs to be made local after you get fill working
+      --record the current point as a vertix
+      vertix_x, vertix_y = current_x, current_y
       add(temp_vertices,vertix_x)
       add(temp_vertices,vertix_y)
-
+      --if we reached the final vertix, break...
       if last_vertix_reached then break end
+      --...otherwise, reset current_point
+      compass_points = get_compass_points(vertix_x, vertix_y)
+      current_point = get_compass_points_with_color(compass_points, path_color)[1] -- only works with l-junctions
      end
      if poly_contains_qix(temp_vertices) == false then
       for v in all(temp_vertices) do
@@ -242,6 +232,7 @@ function level_draw()
   end
 
   rect(0,0,126,126,4) --border
+  print(pget(126,1), 10, 10, 7)
   
   
   spr(player.sprite,player.x - 3,player.y - 3)
