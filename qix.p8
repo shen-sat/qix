@@ -132,7 +132,8 @@ function run_level()
   fill_color = 2
   pathfinding_color = 12
 
-  lines = {}
+  draw_lines = {}
+  path_lines = {}
   
   started_drawing = false
   finished_drawing = false
@@ -212,6 +213,12 @@ function level_update()
     -- -- calculate area
     started_drawing = false
     finished_drawing = false
+
+    for l in all(draw_lines) do
+     add(path_lines,l)
+    end
+    draw_lines = {}
+    
    end
   end
 
@@ -223,24 +230,28 @@ end
 function level_draw()
   -- higher something is here, the further in the background it is
   cls()
+  pal()
   -- qix:draw()
   pset(temp_qix.x,temp_qix.y,7)
   render_poly(vertices, fill_color)
 
-  for l in all(lines) do
-   line(l.x0,l.y0,l.x1,l.y1,l.col)
+  -- if not started_drawing then pal(draw_color,path_color) end
+  for dl in all(draw_lines) do
+   line(dl.x0,dl.y0,dl.x1,dl.y1,dl.col)
   end
+  for pl in all(path_lines) do
+   line(pl.x0,pl.y0,pl.x1,pl.y1,path_color)
+  end
+  
 
   rect(0,0,126,126,4) --border
-  print(pget(126,1), 10, 10, 7)
-  
   
   spr(player.sprite,player.x - 3,player.y - 3)
 end
 
 function create_line()
  local line_part = { x0 = player.x, y0 = player.y, x1 = player.prev_x, y1 = player.prev_y, col = draw_color }
- add(lines,line_part)
+ add(draw_lines,line_part)
 end
 
 function player_move(next_x, next_y, direction, player_move_called_already)
@@ -355,7 +366,7 @@ end
 -- create line
 -- create_line = function(self)
 --  line_part = { x0 = self.x, y0 = self.y, x1 = self.prev_x, y1 = self.prev_y, col = draw_color }
---  add(lines,line_part)
+--  add(draw_lines,line_part)
 -- end
 
 -- draw paths and rects for player to move along
