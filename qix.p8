@@ -187,7 +187,7 @@ function level_update()
       last_vertix_reached = compass_points_contain_color(compass_points, draw_color)
       --check if current point is an l-junction or a final vertix. if not, move along to next pixel
       while pget(current_x + x_counter,current_y + y_counter) != background_color and not last_vertix_reached do
-       pset(current_x + x_counter,current_y + y_counter,pathfinding_color)
+       pset(current_x,current_y,pathfinding_color)
        current_y += y_counter
        current_x += x_counter
        compass_points = get_compass_points(current_x, current_y)
