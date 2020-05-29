@@ -111,8 +111,8 @@ function run_level()
   }
 
   player = {
-   x = 0,
-   y = 126,
+   x = 2,
+   y = 2,
    prev_x = 0,
    prev_y = 127, 
    sprite = 1,
@@ -131,6 +131,7 @@ function run_level()
   background_color = 0
   fill_color = 2
   pathfinding_color = 12
+  outer_border_color = 9
 
   draw_lines = {}
   path_lines = {}
@@ -186,7 +187,7 @@ function level_update()
       compass_points = get_compass_points(current_x, current_y)
       last_vertix_reached = compass_points_contain_color(compass_points, draw_color)
       --check if current point is an l-junction or a final vertix. if not, move along to next pixel
-      while pget(current_x + x_counter,current_y + y_counter) != background_color and not last_vertix_reached do
+      while pget(current_x + x_counter,current_y + y_counter) != outer_border_color and not last_vertix_reached do
        pset(current_x,current_y,pathfinding_color)
        current_y += y_counter
        current_x += x_counter
@@ -244,9 +245,12 @@ function level_draw()
   end
   
 
-  rect(0,0,126,126,4) --border
+  rect(2,2,126,126,4) --border
   
   spr(player.sprite,player.x - 3,player.y - 3)
+  
+  rect(1,1,127,127,outer_border_color) --outer border
+  rect(0,0,128,128,outer_border_color) --outer border
 end
 
 function create_line()
@@ -257,7 +261,7 @@ end
 function player_move(next_x, next_y, direction, player_move_called_already)
  local compass_points = get_compass_points(next_x, next_y)
 
- if pget(next_x, next_y) == path_color and compass_points_contain_color(compass_points, background_color) then
+ if pget(next_x, next_y) == path_color and compass_points_contain_color(compass_points, outer_border_color) then
   if started_drawing then finished_drawing = true end
   player.x, player.y = next_x, next_y
   if btn(5) then create_line() end -- when moving from drawing a line to a path, we need to continue drawing a line 
