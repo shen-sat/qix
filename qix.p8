@@ -350,7 +350,11 @@ function no_of_colored_compass_points(compass_points, col)
 end
 
 function pixel_in_border(x,y)
- if x < 1 or x > 125 or y < 1 or y > 125 then return true end
+ if x < 1 or x > 125 or y < 1 or y > 125 then 
+  return true
+ else
+  return false
+ end
 end
 
 function pixel_outside_border(x,y)
