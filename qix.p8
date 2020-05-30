@@ -218,9 +218,7 @@ function level_update()
       end
      end
      if poly_contains_qix(temp_vertices) == false then
-      for v in all(temp_vertices) do
-       add(vertices,v)
-      end
+      add(vertices,temp_vertices)
      end
     end
 
@@ -247,7 +245,10 @@ function level_draw()
   pal()
   -- qix:draw()
   pset(temp_qix.x,temp_qix.y,7)
-  render_poly(vertices, fill_color)
+  for shape in all(vertices) do
+   render_poly(shape, fill_color)
+  end
+  
 
   -- if not started_drawing then pal(draw_color,path_color) end
   for dl in all(draw_lines) do
