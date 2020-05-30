@@ -184,25 +184,38 @@ function level_update()
       local x_counter = current_x - vertix_x
       local y_counter = current_y - vertix_y
       --check if current point is the final vertix (probbaly it won't be, but let's check anyway)
-      compass_points = get_compass_points(current_x, current_y)
-      last_vertix_reached = compass_points_contain_color(compass_points, draw_color)
+      local compass_points = get_compass_points(current_x, current_y)
+      local last_vertix_reached = compass_points_contain_color(compass_points, draw_color)
+      --check if we are at a t-junction
+      local t_junction_reached = #get_compass_points_with_color(compass_points, path_color) == 2
       --check if current point is an l-junction or a final vertix. if not, move along to next pixel
-      while pget(current_x + x_counter,current_y + y_counter) != outer_border_color and not last_vertix_reached do
+      while pget(current_x + x_counter,current_y + y_counter) != outer_border_color and not last_vertix_reached and not t_junction_reached do
        pset(current_x,current_y,pathfinding_color)
        current_y += y_counter
        current_x += x_counter
        compass_points = get_compass_points(current_x, current_y)
        last_vertix_reached = compass_points_contain_color(compass_points, draw_color)
+       t_junction_reached = #get_compass_points_with_color(compass_points, path_color) == 2
       end   
-      --record the current point as a vertix
+      --record the current point as a vertix and set it to pathfinding color
       vertix_x, vertix_y = current_x, current_y
+      pset(vertix_x,vertix_y,pathfinding_color)
       add(temp_vertices,vertix_x)
       add(temp_vertices,vertix_y)
       --if we reached the final vertix, break...
       if last_vertix_reached then break end
       --...otherwise, reset current_point
       compass_points = get_compass_points(vertix_x, vertix_y)
-      current_point = get_compass_points_with_color(compass_points, path_color)[1] -- only works with l-junctions
+      if t_junction_reached then
+       local t_junction_cps = get_compass_points(current_x, current_y)
+       local path_points = get_compass_points_with_color(t_junction_cps, path_color)
+       for p in all(path_points) do
+        local p_cps = get_compass_points(p.x, p.y)
+        if compass_points_contain_color(p_cps, background_color) == true then current_point = p end 
+       end
+      else
+       current_point = get_compass_points_with_color(compass_points, path_color)[1] -- only works with l-junctions
+      end
      end
      if poly_contains_qix(temp_vertices) == false then
       for v in all(temp_vertices) do
@@ -246,9 +259,7 @@ function level_draw()
   
 
   rect(2,2,126,126,4) --border
-  
   spr(player.sprite,player.x - 3,player.y - 3)
-  
   rect(1,1,127,127,outer_border_color) --outer border
   rect(0,0,128,128,outer_border_color) --outer border
 end
