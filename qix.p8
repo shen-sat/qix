@@ -273,7 +273,7 @@ end
 function player_move(next_x, next_y, direction, player_move_called_already)
  local compass_points = get_compass_points(next_x, next_y)
 
- if pget(next_x, next_y) == path_color and compass_points_contain_color(compass_points, outer_border_color) then
+ if pget(next_x, next_y) == path_color then
   if started_drawing then finished_drawing = true end
   player.x, player.y = next_x, next_y
   if btn(5) then create_line() end -- when moving from drawing a line to a path, we need to continue drawing a line 
